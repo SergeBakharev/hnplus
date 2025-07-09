@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class HNCommentsParser extends BaseHTMLParser<HNPostComments> {
 
@@ -42,21 +43,12 @@ public class HNCommentsParser extends BaseHTMLParser<HNPostComments> {
             if (mainRowElement == null)
                 continue;
 
-            // The not portion of this query is meant to remove the reply link
-            // from the text.  As far as I can tell that is the only place
-            // where size=1 is used.  If that turns out to not be the case then
-            // searching for u tags is also a pretty decent option - @jmaltz
-            Element mainCommentDiv = mainRowElement.select("div.comment > span").first();
+            Element mainCommentDiv = mainRowElement.select("div.commtext").first();
             if (mainCommentDiv == null)
                 continue;
 
-            mainCommentDiv.select("div.reply").remove();
-
             // Parse the class attribute to get the comment color
-            int commentColor = Color.rgb(0, 0, 0);
-            if (mainCommentDiv.attributes().hasKey("class")) {
-                commentColor = getCommentColor(mainCommentDiv.attributes().get("class"));
-            }
+            int commentColor = getCommentColor(mainCommentDiv.classNames());
 
             // In order to eliminate whitespace at the end of multi-line comments,
             // <p> tags are replaced with double <br/> tags.
@@ -123,27 +115,29 @@ public class HNCommentsParser extends BaseHTMLParser<HNPostComments> {
         return null;
     }
 
-    private int getCommentColor(String className) {
-        if ("c5a".equals(className)) {
+    private int getCommentColor(Set<String> classNames) {
+        if (classNames.contains("c00")) {
+            return Color.BLACK;
+        } else if (classNames.contains("c5a")) {
             return Color.rgb(0x5A, 0x5A, 0x5A);
-        } else if ("c73".equals(className)) {
+        } else if (classNames.contains("c73")) {
             return Color.rgb(0x73, 0x73, 0x73);
-        } else if ("c82".equals(className)) {
+        } else if (classNames.contains("c82")) {
             return Color.rgb(0x82, 0x82, 0x82);
-        } else if ("c88".equals(className)) {
+        } else if (classNames.contains("c88")) {
             return Color.rgb(0x88, 0x88, 0x88);
-        } else if ("c9c".equals(className)) {
+        } else if (classNames.contains("c9c")) {
             return Color.rgb(0x9C, 0x9C, 0x9C);
-        } else if ("cae".equals(className)) {
+        } else if (classNames.contains("cae")) {
             return Color.rgb(0xAE, 0xAE, 0xAE);
-        } else if ("cbe".equals(className)) {
+        } else if (classNames.contains("cbe")) {
             return Color.rgb(0xBE, 0xBE, 0xBE);
-        } else if ("cce".equals(className)) {
+        } else if (classNames.contains("cce")) {
             return Color.rgb(0xCE, 0xCE, 0xCE);
-        } else if ("cdd".equals(className)) {
+        } else if (classNames.contains("cdd")) {
             return Color.rgb(0xDD, 0xDD, 0xDD);
         } else {
-            return Color.rgb(0, 0, 0);
+            return Color.BLACK;
         }
     }
 }
