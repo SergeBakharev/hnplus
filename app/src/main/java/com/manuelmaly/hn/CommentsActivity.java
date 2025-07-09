@@ -13,7 +13,7 @@ import android.os.Looper;
 import android.os.Parcelable;
 import androidx.core.view.MenuItemCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
+import androidx.browser.customtabs.CustomTabsIntent;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -49,6 +49,7 @@ import com.manuelmaly.hn.util.FileUtil;
 import com.manuelmaly.hn.util.FontHelper;
 import com.manuelmaly.hn.util.SpotlightActivity;
 import com.manuelmaly.hn.util.ViewedUtils;
+import com.manuelmaly.hn.util.CustomTabActivityHelper;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
@@ -145,6 +146,9 @@ public class CommentsActivity extends BaseListActivity implements
                                     CommentsActivity.this);
                     MainActivity.openURLInBrowser(articleURL,
                             CommentsActivity.this);
+                } else if (Settings.getHtmlViewer(CommentsActivity.this).equals(
+                        getString(R.string.pref_htmlviewer_customtabs))) {
+                    MainActivity.openURLInCustomTabs(mPost, null, CommentsActivity.this);
                 } else {
                     openArticleReader();
                 }
@@ -369,20 +373,11 @@ public class CommentsActivity extends BaseListActivity implements
     }
 
     private void openArticleReader() {
-        Intent intent = new Intent(this, ArticleReaderActivity_.class);
-        intent.putExtra(CommentsActivity.EXTRA_HNPOST, mPost);
-        if (getIntent().getStringExtra(
-                ArticleReaderActivity.EXTRA_HTMLPROVIDER_OVERRIDE) != null) {
-            intent.putExtra(
-                    ArticleReaderActivity.EXTRA_HTMLPROVIDER_OVERRIDE,
-                    getIntent().getStringExtra(
-                            ArticleReaderActivity.EXTRA_HTMLPROVIDER_OVERRIDE));
-        }
-
-        startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in,
-                android.R.anim.fade_out);
-        finish();
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent customTabsIntent = builder.build();
+        CustomTabActivityHelper.openCustomTab(
+                this, customTabsIntent, mPost, Settings.getHtmlProvider(CommentsActivity.this),
+                new ArticleReaderActivity());
     }
 
     private void initCommentsHeader() {
