@@ -74,6 +74,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".login.LoginActivity_" android:label="@string/credentials" android:theme="@android:style/Theme.Dialog" />
+        <activity android:name=".GeckoViewActivity" 
+            android:theme="@style/ActionBar.Orange"
+            android:windowSoftInputMode="stateUnspecified|adjustResize" />
     </application>
 
 </manifest>

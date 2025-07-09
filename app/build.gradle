@@ -17,6 +17,8 @@ dependencies {
     implementation "androidx.browser:browser:1.4.0"
     implementation "androidx.annotation:annotation:1.5.0"
 
+    implementation "org.mozilla.geckoview:geckoview:125.0.20240425211020"
+
     implementation "cz.msebera.android:httpclient:4.5.8"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -25,12 +27,14 @@ dependencies {
 android {
     compileOptions {
         encoding "UTF-8"
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.manuelmaly.hn"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode 26
         versionName "1.9.16"
@@ -71,4 +75,11 @@ android {
         }
     }
     namespace 'com.manuelmaly.hn'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://maven.mozilla.org/maven2/"
+    }
 }

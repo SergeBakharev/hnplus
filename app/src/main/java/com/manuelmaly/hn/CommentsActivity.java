@@ -149,6 +149,9 @@ public class CommentsActivity extends BaseListActivity implements
                 } else if (Settings.getHtmlViewer(CommentsActivity.this).equals(
                         getString(R.string.pref_htmlviewer_customtabs))) {
                     MainActivity.openURLInCustomTabs(mPost, null, CommentsActivity.this);
+                } else if (Settings.getHtmlViewer(CommentsActivity.this).equals(
+                        getString(R.string.pref_htmlviewer_geckoview))) {
+                    MainActivity.openURLInGeckoView(mPost, CommentsActivity.this);
                 } else {
                     openArticleReader();
                 }

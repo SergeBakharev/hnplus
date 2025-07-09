@@ -512,6 +512,9 @@ public class MainActivity extends BaseListActivity implements
                         } else if (Settings.getHtmlViewer(MainActivity.this).equals(
                                 getString(R.string.pref_htmlviewer_customtabs))) {
                             openURLInCustomTabs(getItem(position), null, MainActivity.this);
+                        } else if (Settings.getHtmlViewer(MainActivity.this).equals(
+                                getString(R.string.pref_htmlviewer_geckoview))) {
+                            openURLInGeckoView(getItem(position), MainActivity.this);
                         } else {
                             openPostInApp(getItem(position), null,
                                     MainActivity.this);
@@ -749,6 +752,13 @@ public class MainActivity extends BaseListActivity implements
         CustomTabsIntent customTabsIntent = builder.build();
         CustomTabActivityHelper.openCustomTab(
                 a, customTabsIntent, post, overrideHtmlProvider, new ArticleReaderActivity());
+    }
+
+    public static void openURLInGeckoView(HNPost post, Activity a) {
+        Intent intent = new Intent(a, GeckoViewActivity.class);
+        intent.putExtra("post", post);
+        intent.putExtra("url", post.getURL());
+        a.startActivity(intent);
     }
 
     public static void openPostInApp(HNPost post, String overrideHtmlProvider,
