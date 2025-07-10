@@ -37,7 +37,11 @@ jobs:
           echo "Using version name: $VERSION_NAME"
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease -PversionName=${{ steps.version_name.outputs.version_name }}
+        run: |
+         if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            ./gradlew assembleDebug -PversionName=${{ steps.version_name.outputs.version_name }}
+          else
+            ./gradlew assembleRelease -PversionName=${{ steps.version_name.outputs.version_name }}
 
       - name: Find APK path
         id: apk_path
