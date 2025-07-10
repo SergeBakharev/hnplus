@@ -37,8 +37,8 @@ android {
         applicationId "com.manuelmaly.hn"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 26
-        versionName "1.9.16"
+        versionCode 1
+        versionName project.hasProperty("versionName") ? project.property("versionName") : "0.0.0"
     }
     signingConfigs {
         def props = new Properties()
@@ -54,7 +54,6 @@ android {
         release {
             minifyEnabled false
             signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             applicationVariants.all { variant ->
                 variant.outputs.each { output ->
                     def outputFile = output.outputFileName
