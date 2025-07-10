@@ -122,6 +122,9 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                 getString(R.string.pref_htmlviewer_customtabs) -> {
                     MainActivity.openURLInCustomTabs(mPost, null, this)
                 }
+                getString(R.string.pref_htmlviewer_geckoview) -> {
+                    MainActivity.openPostInGeckoView(mPost, null, this, true)
+                }
                 else -> {
                     openArticleReader()
                 }

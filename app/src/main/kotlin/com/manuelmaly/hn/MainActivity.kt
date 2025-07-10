@@ -408,6 +408,9 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
                                 getString(R.string.pref_htmlviewer_customtabs) -> {
                                     openURLInCustomTabs(getItem(position), null, this@MainActivity)
                                 }
+                                getString(R.string.pref_htmlviewer_geckoview) -> {
+                                    openPostInGeckoView(getItem(position), null, this@MainActivity, false)
+                                }
                                 else -> {
                                     openPostInApp(getItem(position), null, this@MainActivity)
                                 }
@@ -570,6 +573,16 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
             if (overrideHtmlProvider != null) {
                 i.putExtra(ArticleReaderActivity.EXTRA_HTMLPROVIDER_OVERRIDE, overrideHtmlProvider)
             }
+            a.startActivity(i)
+        }
+        
+        fun openPostInGeckoView(post: HNFeedPost?, overrideHtmlProvider: String?, a: android.app.Activity, cameFromComments: Boolean = false) {
+            val i = Intent(a, GeckoViewActivity::class.java)
+            i.putExtra(GeckoViewActivity.EXTRA_HNPOST, post)
+            if (overrideHtmlProvider != null) {
+                i.putExtra(GeckoViewActivity.EXTRA_HTMLPROVIDER_OVERRIDE, overrideHtmlProvider)
+            }
+            i.putExtra(GeckoViewActivity.EXTRA_CAME_FROM_COMMENTS, cameFromComments)
             a.startActivity(i)
         }
         
