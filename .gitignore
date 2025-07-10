@@ -16,8 +16,8 @@ screenshot*
 *.apk
 .gradle/
 build/
-.idea
-release.properties
+.ideas
 crashlytics.properties
 *.iml
 .vscode/
+.idea/
