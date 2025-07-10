@@ -79,6 +79,13 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
     private fun init() {
         mActionbarTitle = supportActionBar?.customView?.findViewById(R.id.actionbar_title)
         
+        // Set the action bar title immediately
+        mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
+        mActionbarTitle?.text = getString(R.string.article)
+        mActionbarTitle?.setOnClickListener {
+            launchCommentsActivity()
+        }
+        
         // NOTE: The generic version of getSerializableExtra requires minSdk 33+.
         // Keeping the deprecated method for broader compatibility.
         mPost = intent.getSerializableExtra(EXTRA_HNPOST) as? HNFeedPost
@@ -104,6 +111,19 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
                 mGeckoSession?.loadUri(url)
             }
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        
+        mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
+        mActionbarTitle?.text = getString(R.string.article)
+        mActionbarTitle?.setOnClickListener {
+            launchCommentsActivity()
+        }
+        
+        // User may have toggled pull-down refresh, so toggle the SwipeRefreshLayout.
+        toggleSwipeRefreshLayout()
     }
     
     private fun initGeckoView() {

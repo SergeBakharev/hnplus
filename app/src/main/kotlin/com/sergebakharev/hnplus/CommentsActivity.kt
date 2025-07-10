@@ -111,6 +111,8 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
         binding.commentsList.adapter = mCommentsListAdapter
         
         mActionbarTitle = supportActionBar?.customView?.findViewById(R.id.actionbar_title)
+        
+        // Set the action bar title immediately
         mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
         mActionbarTitle?.text = getString(R.string.comments)
         mActionbarTitle?.setOnClickListener {
@@ -194,6 +196,10 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                 true
             }
             android.R.id.home -> {
+                // Go back to MainActivity instead of the previous activity
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
                 finish()
                 true
             }

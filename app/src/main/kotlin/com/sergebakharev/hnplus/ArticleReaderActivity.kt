@@ -78,6 +78,13 @@ class ArticleReaderActivity : AppCompatActivity(), CustomTabActivityHelper.Custo
     private fun init() {
         mActionbarTitle = supportActionBar?.customView?.findViewById(R.id.actionbar_title)
         
+        // Set the action bar title immediately
+        mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
+        mActionbarTitle?.text = getString(R.string.article)
+        mActionbarTitle?.setOnClickListener {
+            launchCommentsActivity()
+        }
+        
         mPost = intent.getSerializableExtra(EXTRA_HNPOST) as? HNFeedPost
         mCameFromComments = intent.getBooleanExtra(EXTRA_CAME_FROM_COMMENTS, false)
         

@@ -75,7 +75,7 @@
         </activity>
         <activity android:name=".login.LoginActivity" android:label="@string/credentials" android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity android:name=".GeckoViewActivity" 
-            android:theme="@style/ActionBar.Orange"
+            android:theme="@style/ActionBar.White"
             android:windowSoftInputMode="stateUnspecified|adjustResize" />
 
     </application>
