@@ -44,7 +44,7 @@
                 android:textColor="@color/gray_comments_information"
                 android:textSize="14sp" />
 
-            <com.manuelmaly.hn.reuse.LinkifiedTextView
+            <com.sergebakharev.hnplus.reuse.LinkifiedTextView
                 android:id="@+id/comments_list_item_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

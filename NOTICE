@@ -4,3 +4,17 @@ This project is a fork of HN (Android) by Manuel Maly
 Original project: https://github.com/manmal/hn-android
 Copyright (c) 2012 Manuel Maly
 License: MIT License (http://opensource.org/licenses/mit-license.php)
+
+This app bundles uBlock Origin (https://github.com/gorhill/uBlock), an efficient blocker for Chromium and Firefox, developed and maintained by Raymond Hill (gorhill) and contributors. uBlock Origin is licensed under the GPL-3.0 license.
+
+Portions of this app are based on:
+
+uBlock Origin (https://github.com/gorhill/uBlock)
+  Copyright (c) Raymond Hill (gorhill) and contributors
+  License: GPL-3.0 (https://www.gnu.org/licenses/gpl-3.0.html)
+  An efficient blocker for Chromium and Firefox, bundled in this app.
+
+Mozilla GeckoView (https://mozilla.github.io/geckoview/)
+  Copyright (c) Mozilla and contributors
+  License: MPL-2.0 (https://www.mozilla.org/MPL/2.0/)
+  GeckoView is a full-featured, standards-compliant web engine for Android, powering the browser functionality in this app.

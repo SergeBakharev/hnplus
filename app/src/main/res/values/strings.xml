@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HN</string>
+    <string name="app_name">HN+</string>
     <string name="comments">Comments</string>
     <string name="article">Article</string>
     <string name="share_article_url">Share Article URL</string>
