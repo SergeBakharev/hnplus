@@ -4,34 +4,35 @@ buildscript {
     }
 }
 
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
 
 dependencies {
-    annotationProcessor "org.androidannotations:androidannotations:4.8.0"
-    implementation "org.androidannotations:androidannotations-api:4.8.0"
-
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.21"
     implementation "androidx.core:core:1.9.0"
     implementation "androidx.legacy:legacy-support-core-utils:1.0.0"
     implementation "androidx.appcompat:appcompat:1.5.1"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     implementation "androidx.browser:browser:1.4.0"
     implementation "androidx.annotation:annotation:1.5.0"
-
-    implementation "org.mozilla.geckoview:geckoview:125.0.20240425211020"
-
+    implementation "org.mozilla.geckoview:geckoview:140.0.20250707120347"
     implementation "cz.msebera.android:httpclient:4.5.8"
-
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 android {
+    namespace 'com.manuelmaly.hn'
     compileOptions {
         encoding "UTF-8"
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    compileSdkVersion 33
-
+    compileSdkVersion 35
+    buildFeatures {
+        viewBinding true
+    }
     defaultConfig {
         applicationId "com.manuelmaly.hn"
         minSdkVersion 21
@@ -39,11 +40,9 @@ android {
         versionCode 26
         versionName "1.9.16"
     }
-
     signingConfigs {
         def props = new Properties()
         props.load(new FileInputStream(rootProject.file("release.properties")))
-
         release {
             storeFile new File(props.keyStore.toString())
             storePassword props.keyStorePassword
@@ -51,13 +50,11 @@ android {
             keyPassword props.keyAliasPassword
         }
     }
-
     buildTypes {
         release {
             minifyEnabled false
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-
             applicationVariants.all { variant ->
                 variant.outputs.each { output ->
                     def outputFile = output.outputFileName
@@ -69,12 +66,12 @@ android {
                 }
             }
         }
-
         debug {
-
         }
     }
-    namespace 'com.manuelmaly.hn'
+    sourceSets {
+        main.java.srcDirs = ['src/main/kotlin']
+    }
 }
 
 repositories {

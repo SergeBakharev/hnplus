@@ -8,7 +8,7 @@
     <string name="external_browser">External Browser</string>
     <string name="upvote">Upvote</string>
     <string name="downvote">Downvote</string>
-    <string name="please_log_in">Please log in first via \'Settings\' -> \'User\'.</string>
+    <string name="please_log_in">Please log in first via Settings -&gt; User.</string>
     <string name="already_upvoted">Upvoted by you</string>
     <string name="already_voted_on">Already voted on</string>
     <string name="credentials">Enter your HN credentials:</string>
@@ -39,7 +39,6 @@
     <string name="login_success_reloading">Login successful: reloading the comments to get proper upvote links.</string>
     <string name="click_on_comments">Click on comments to read the related article</string>
     <string name="click_on_article">Click on article to read the related comments</string>
-    
     <!-- Error messages -->
     <string name="error_login_device_offline">Your device has no network connection at the moment.</string>
     <string name="error_unknown_error">An unknown error occurred.</string>
@@ -50,7 +49,4 @@
     <string name="error_unable_to_load_more">We were unable to load more articles</string>
     <string name="logout_question_lbl">Are you sure you want to logout from HN?</string>
     <string name="ok">Ok</string>
-    <string name="crashlytics_pref">Share Anonymous Reports</string>
-    <string name="crashlytics_off">No anonymous usage statistics and reports are shared</string>
-    <string name="crashlytics_on">You are sharing anonymous usage statistics and crash reports. Thank You!</string>
-</resources>
+</resources> 
