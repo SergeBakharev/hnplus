@@ -26,15 +26,17 @@
     </string-array>
 
     <string name="pref_title_htmlviewer">View Articles within &#8230;</string>
-    <string name="pref_default_htmlviewer">The App</string>
-    <string name="pref_htmlviewer_customtabs">Custom Tab</string>
-    <string name="pref_htmlviewer_app">The App</string>
-    <string name="pref_htmlviewer_browser">The System Browser</string>
+    <string name="pref_default_htmlviewer">Firefox GeckoView (in-app)</string>
+    <string name="pref_htmlviewer_customtabs">Android Custom Tab (via supported browser)</string>
+    <string name="pref_htmlviewer_app">Android Webview (in-app)</string>
+    <string name="pref_htmlviewer_browser">System Browser</string>
+    <string name="pref_htmlviewer_geckoview">Firefox GeckoView (in-app)</string>
 
     <string-array name="pref_array_htmlviewer">
         <item>@string/pref_htmlviewer_app</item>
         <item>@string/pref_htmlviewer_customtabs</item>
         <item>@string/pref_htmlviewer_browser</item>
+        <item>@string/pref_htmlviewer_geckoview</item>
     </string-array>
 
     <string name="pref_title_pulldownrefresh">Pull Down to Refresh</string>
