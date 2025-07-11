@@ -54,24 +54,36 @@ android {
         release {
             minifyEnabled false
             signingConfig signingConfigs.release
-            applicationVariants.all { variant ->
-                variant.outputs.each { output ->
-                    def outputFile = output.outputFileName
-                    if (outputFile != null && outputFile.endsWith('.apk')) {
-                        def fileName = outputFile.replace('.apk',
-                                "-v${versionName}-b${versionCode}.apk")
-                        output.outputFileName = fileName
-                    }
-                }
-            }
         }
         debug {
+        }
+    }
+    
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFileName
+            if (outputFile != null && outputFile.endsWith('.apk')) {
+                def fileName = "hnplus-${variant.buildType.name}-${versionName}.apk"
+                output.outputFileName = fileName
+            }
         }
     }
     sourceSets {
         main.java.srcDirs = ['src/main/kotlin']
     }
 }
+
+// Task to copy NOTICE file to assets
+task copyNoticeFile(type: Copy) {
+    from rootProject.file('NOTICE')
+    into file('src/main/assets')
+    rename { String fileName ->
+        'NOTICE'
+    }
+}
+
+// Make sure the copy task runs before the build
+preBuild.dependsOn copyNoticeFile
 
 repositories {
     mavenCentral()
