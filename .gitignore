@@ -21,3 +21,6 @@ crashlytics.properties
 *.iml
 .vscode/
 .idea/
+*.jks
+release.properties
+.kotlin/
