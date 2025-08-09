@@ -37,7 +37,7 @@ android {
         applicationId "com.sergebakharev.hnplus"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 5
+        versionCode 6
         versionName project.hasProperty("versionName") ? project.property("versionName") : "0.0.0"
     }
     signingConfigs {
