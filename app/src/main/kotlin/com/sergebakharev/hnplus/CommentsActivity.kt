@@ -115,6 +115,10 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
         // Set the action bar title immediately
         mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
         mActionbarTitle?.text = getString(R.string.comments)
+        
+        // Adjust content positioning to prevent action bar overlap
+        DisplayHelper.adjustContentBelowActionBar(this, binding.commentsSwiperefreshlayout)
+        
         mActionbarTitle?.setOnClickListener {
             when (Settings.getHtmlViewer(this)) {
                 getString(R.string.pref_htmlviewer_browser) -> {
