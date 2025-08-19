@@ -228,16 +228,8 @@ class BlockifyPromptDelegate : WebExtensionController.PromptDelegate {
     }
     
     private fun handleBackNavigation() {
-        if (mCameFromComments) {
-            // If we came from CommentsActivity, go back to MainActivity
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            finish()
-        } else {
-            // Normal back navigation
-            finish()
-        }
+        // Just finish - CommentsActivity is already finished, so this goes to MainActivity
+        finish()
     }
     
     private fun toggleSwipeRefreshLayout() {
@@ -273,7 +265,7 @@ class BlockifyPromptDelegate : WebExtensionController.PromptDelegate {
             i.putExtra(EXTRA_HTMLPROVIDER_OVERRIDE, override)
         }
         startActivity(i)
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        overridePendingTransition(R.anim.slide_down_in, R.anim.slide_up_out)
         finish()
     }
     

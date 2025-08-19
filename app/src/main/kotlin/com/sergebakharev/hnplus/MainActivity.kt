@@ -580,7 +580,7 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
             a.startActivity(i)
         }
         
-        fun openPostInGeckoView(post: HNFeedPost?, overrideHtmlProvider: String?, a: android.app.Activity, cameFromComments: Boolean = false) {
+                fun openPostInGeckoView(post: HNFeedPost?, overrideHtmlProvider: String?, a: android.app.Activity, cameFromComments: Boolean = false) {
             val i = Intent(a, GeckoViewActivity::class.java)
             i.putExtra(GeckoViewActivity.EXTRA_HNPOST, post)
             if (overrideHtmlProvider != null) {
@@ -588,6 +588,13 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
             }
             i.putExtra(GeckoViewActivity.EXTRA_CAME_FROM_COMMENTS, cameFromComments)
             a.startActivity(i)
+            
+            // Use slide up animation when coming from comments, default animation otherwise
+            if (cameFromComments) {
+                a.overridePendingTransition(R.anim.slide_up_in, R.anim.slide_down_out)
+                // Finish the CommentsActivity so back button goes to MainActivity
+                a.finish()
+            }
         }
         
         fun shareUrl(post: HNFeedPost?, a: android.app.Activity) {

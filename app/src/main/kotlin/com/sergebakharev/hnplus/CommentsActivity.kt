@@ -200,10 +200,7 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                 true
             }
             android.R.id.home -> {
-                // Go back to MainActivity instead of the previous activity
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
+                // Go back to MainActivity
                 finish()
                 true
             }
