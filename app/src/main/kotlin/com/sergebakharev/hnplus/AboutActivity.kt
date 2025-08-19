@@ -19,7 +19,7 @@ class AboutActivity : AppCompatActivity() {
         binding.aboutHn.typeface = FontHelper.getComfortaa(this, true)
 
         // Set up the URL link
-        binding.aboutUrl.text = Html.fromHtml("<a href=\"https://www.serge.industries\">serge.industries</a>")
+        binding.aboutUrl.text = Html.fromHtml("<a href=\"https://serge.industries\">serge.industries</a>")
         binding.aboutUrl.movementMethod = LinkMovementMethod.getInstance()
 
         // Set up the GitHub link
