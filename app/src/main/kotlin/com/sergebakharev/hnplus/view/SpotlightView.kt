@@ -54,7 +54,7 @@ class SpotlightView @JvmOverloads constructor(
         mBackgroundPaint.color = Color.BLACK
         mBackgroundPaint.alpha = 200
 
-        mClearRect = Rect(mXStart.toInt(), mYEnd.toInt(), mXEnd.toInt(), mYStart.toInt())
+        mClearRect = Rect(mXStart.toInt(), mYStart.toInt(), mXEnd.toInt(), mYEnd.toInt())
         mText = text
     }
 

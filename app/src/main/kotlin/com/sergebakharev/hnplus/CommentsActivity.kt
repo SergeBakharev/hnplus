@@ -314,9 +314,21 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
     private fun showCommentsSpotlight() {
         val posArray = IntArray(2)
         mActionbarTitle?.getLocationInWindow(posArray)
+        
+        // Calculate the center position of the action bar title
+        val titleWidth = mActionbarTitle?.width ?: 0
+        val titleHeight = mActionbarTitle?.height ?: 0
+        val titleCenterX = posArray[0] + (titleWidth / 2)
+        val titleCenterY = posArray[1] + (titleHeight / 2)
+        
+        // Create a spotlight that covers the action bar title area
+        val spotlightWidth = titleWidth.toFloat()
+        val spotlightHeight = titleHeight.toFloat()
+        val spotlightX = posArray[0].toFloat()
+        val spotlightY = posArray[1].toFloat()
+        
         val intent = SpotlightActivity.intentForSpotlightActivity(
-            this, posArray[0].toFloat(), (mActionbarTitle?.width ?: 0).toFloat(),
-            0f, (supportActionBar?.height ?: 0).toFloat(),
+            this, spotlightX, spotlightWidth, spotlightY, spotlightHeight,
             getString(R.string.click_on_comments)
         )
         startActivityForResult(intent, ACTIVITY_SPOTLIGHT)
