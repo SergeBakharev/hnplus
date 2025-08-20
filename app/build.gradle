@@ -37,7 +37,7 @@ android {
         applicationId "com.sergebakharev.hnplus"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 7
+        versionCode 8
         versionName project.hasProperty("versionName") ? project.property("versionName") : "0.0.0"
     }
     signingConfigs {
@@ -45,7 +45,7 @@ android {
         if (rootProject.file("release.properties").exists()) {
             props.load(new FileInputStream(rootProject.file("release.properties")))
         }
-        upload {
+        release {
             storeFile props.keyStore ? new File(rootProject.projectDir, props.keyStore.toString()) : null
             storePassword props.keyStorePassword ?: ""
             keyAlias props.keyAlias ?: ""
@@ -54,11 +54,10 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
-            signingConfig signingConfigs.upload
+            minifyEnabled false
+            signingConfig signingConfigs.release
             debuggable false
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            shrinkResources false
         }
         debug {
         }
