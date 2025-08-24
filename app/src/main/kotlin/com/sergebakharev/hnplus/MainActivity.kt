@@ -32,7 +32,6 @@ import com.sergebakharev.hnplus.task.HNFeedTaskMainFeed
 import com.sergebakharev.hnplus.task.HNVoteTask
 import com.sergebakharev.hnplus.task.ITaskFinishedHandler
 import com.sergebakharev.hnplus.util.CustomTabActivityHelper
-import com.sergebakharev.hnplus.util.DisplayHelper
 import com.sergebakharev.hnplus.util.FileUtil
 import com.sergebakharev.hnplus.util.FontHelper
 import java.lang.reflect.Field
@@ -97,9 +96,6 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
         binding.mainList.adapter = mPostsListAdapter
         
         mEmptyListPlaceholder?.typeface = FontHelper.getComfortaa(this, true)
-        
-        // Adjust content positioning to prevent action bar overlap
-        DisplayHelper.adjustContentBelowActionBar(this, binding.mainSwiperefreshlayout)
         
         mTitleColor = resources.getColor(R.color.dark_gray_post_title, null)
         mTitleReadColor = resources.getColor(R.color.gray_post_title_read, null)

@@ -19,7 +19,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.sergebakharev.hnplus.databinding.GeckoviewActivityBinding
 import com.sergebakharev.hnplus.model.HNFeedPost
 import com.sergebakharev.hnplus.util.CustomTabActivityHelper
-import com.sergebakharev.hnplus.util.DisplayHelper
 import com.sergebakharev.hnplus.util.FontHelper
 import com.sergebakharev.hnplus.util.SpotlightActivity
 import com.sergebakharev.hnplus.util.ViewedUtils
@@ -83,10 +82,6 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
         // Set the action bar title immediately
         mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
         mActionbarTitle?.text = getString(R.string.article)
-        
-        // Adjust content positioning to prevent action bar overlap
-        DisplayHelper.adjustContentBelowActionBar(this, binding.geckoviewSwiperefreshlayout)
-        
         mActionbarTitle?.setOnClickListener {
             launchCommentsActivity()
         }

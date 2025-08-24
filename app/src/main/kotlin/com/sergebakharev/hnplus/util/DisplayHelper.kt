@@ -7,13 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
-import android.util.TypedValue
 import android.view.View
 import android.view.Window
-import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 object DisplayHelper {
     private var scale: Float? = null
@@ -73,57 +68,5 @@ object DisplayHelper {
         lp.copyFrom(d.window!!.attributes)
         lp.dimAmount = 0.8f
         lp.width = getScreenWidth(a) - 2 * dpToPixel(marginHorizontalDP, a)
-    }
-
-    /**
-     * Adjust content positioning to prevent action bar overlap
-     * Call this in onCreate() after setContentView() for activities with action bars
-     */
-    fun adjustContentBelowActionBar(activity: AppCompatActivity, swipeRefreshLayout: SwipeRefreshLayout) {
-        val actionBarHeight = getActionBarHeight(activity)
-        val targetOffset = 120 // Optimal offset to prevent overlap while minimizing gap
-        
-        Log.d("DisplayHelper", "Adjusting content with offset: $targetOffset")
-        
-        // Set top margin on SwipeRefreshLayout to position content below action bar
-        val params = swipeRefreshLayout.layoutParams as ViewGroup.MarginLayoutParams
-        params.topMargin = targetOffset
-        swipeRefreshLayout.layoutParams = params
-    }
-    
-    /**
-     * Get the actual height of the action bar
-     */
-    private fun getActionBarHeight(activity: AppCompatActivity): Int {
-        val typedValue = TypedValue()
-        val success = activity.theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)
-        
-        Log.d("DisplayHelper", "Theme resolve success: $success")
-        Log.d("DisplayHelper", "TypedValue type: ${typedValue.type}")
-        Log.d("DisplayHelper", "TypedValue data: ${typedValue.data}")
-        
-        return if (success && typedValue.type == TypedValue.TYPE_DIMENSION) {
-            val height = TypedValue.complexToDimensionPixelSize(typedValue.data, activity.resources.displayMetrics)
-            Log.d("DisplayHelper", "Calculated height: $height")
-            height
-        } else {
-            // Try alternative method using support action bar
-            val actionBar = activity.supportActionBar
-            if (actionBar != null) {
-                val height = actionBar.height
-                Log.d("DisplayHelper", "ActionBar height: $height")
-                if (height > 0) height else getFallbackHeight(activity)
-            } else {
-                Log.d("DisplayHelper", "Using fallback height")
-                getFallbackHeight(activity)
-            }
-        }
-    }
-    
-    private fun getFallbackHeight(activity: AppCompatActivity): Int {
-        // Fallback to standard action bar height (56dp)
-        val height = (56 * activity.resources.displayMetrics.density).toInt()
-        Log.d("DisplayHelper", "Fallback height: $height")
-        return height
     }
 }
