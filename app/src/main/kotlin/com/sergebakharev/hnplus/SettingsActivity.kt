@@ -58,7 +58,6 @@ class SettingsActivity : AppCompatActivity() {
         
         // Prevent overlapping with action bar
         val swipeRefreshLayout = findViewById<androidx.swiperefreshlayout.widget.SwipeRefreshLayout>(R.id.settings_swiperefreshlayout)
-        DisplayHelper.adjustContentBelowActionBar(this, swipeRefreshLayout)
     }
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

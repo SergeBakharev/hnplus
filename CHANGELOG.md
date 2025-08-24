@@ -3,6 +3,7 @@
 ## Unreleased
 - Changed: Updated target SDK version to 36
 - Changed: Dependencies updated
+- Changed: Reverted Action bar display helper
 
 ## 0.1.8
 - Fixed: Set an App label so it doesn't use the default appid+name
