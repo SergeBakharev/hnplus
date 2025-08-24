@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Changed: Updated target SDK version to 36
+- Changed: Dependencies updated
+
 ## 0.1.8
 - Fixed: Set an App label so it doesn't use the default appid+name
 - Fixed: Spotlight the correct location on the actionbar during the initial usage popup
