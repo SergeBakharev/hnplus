@@ -1,9 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.9
 - Changed: Updated target SDK version to 36
 - Changed: Dependencies updated
-- Changed: Reverted Action bar display helper
+- Changed: Replace Action bar display helper with fitsSystemWindows=true to prevent content within the app being obscured or hidden by system windows as per Android SDK 35 default edge-to-edge rendering
 
 ## 0.1.8
 - Fixed: Set an App label so it doesn't use the default appid+name
