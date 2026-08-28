@@ -24,13 +24,6 @@ class SettingsActivity : AppCompatActivity() {
         FONTSIZE_SMALL, FONTSIZE_NORMAL, FONTSIZE_BIG
     }
     
-    enum class HTMLPROVIDER {
-        HTMLPROVIDER_ORIGINAL_ARTICLE_URL,
-        HTMLPROVIDER_GOOGLE,
-        HTMLPROVIDER_VIEWTEXT,
-        HTMLPROVIDER_INSTAPAPER
-    }
-    
     enum class HTMLVIEWER {
         HTMLVIEWER_WITHINAPP, HTMLVIEWER_BROWSER
     }
@@ -79,10 +72,9 @@ class SettingsActivity : AppCompatActivity() {
     private inner class SettingsAdapter : BaseAdapter() {
         private val settingsItems = listOf(
             SettingsItem("Font Size", getFontSizeSummary(), 0),
-            SettingsItem("HTML Provider", getHtmlProviderSummary(), 1),
-            SettingsItem("HTML Viewer", getHtmlViewerSummary(), 2),
-            SettingsItem("User", getUserSummary(), 3),
-            SettingsItem(getString(R.string.settings_ublock), getString(R.string.settings_ublock_summary), 4)
+            SettingsItem("HTML Viewer", getHtmlViewerSummary(), 1),
+            SettingsItem("User", getUserSummary(), 2),
+            SettingsItem(getString(R.string.settings_ublock), getString(R.string.settings_ublock_summary), 3)
         )
         
         override fun getCount(): Int = settingsItems.size
@@ -133,10 +125,9 @@ class SettingsActivity : AppCompatActivity() {
         private fun onSettingItemClick(item: SettingsItem, position: Int) {
             when (position) {
                 0 -> showFontSizeDialog()
-                1 -> showHtmlProviderDialog()
-                2 -> showHtmlViewerDialog()
-                3 -> handleUserClick()
-                4 -> openUBlockSettings()
+                1 -> showHtmlViewerDialog()
+                2 -> handleUserClick()
+                3 -> openUBlockSettings()
             }
         }
         
@@ -162,45 +153,22 @@ class SettingsActivity : AppCompatActivity() {
                 .show()
         }
         
-        private fun showHtmlProviderDialog() {
-            val options = arrayOf("Original URL", "Instapaper", "Textise")
-            val currentIndex = when (Settings.getHtmlProvider(this@SettingsActivity)) {
-                getString(R.string.pref_htmlprovider_instapaper) -> 1
-                getString(R.string.pref_htmlprovider_textise) -> 2
-                else -> 0
-            }
-            
-            AlertDialog.Builder(this@SettingsActivity)
-                .setTitle("HTML Provider")
-                .setSingleChoiceItems(options, currentIndex) { _, which ->
-                    val newValue = when (which) {
-                        1 -> getString(R.string.pref_htmlprovider_instapaper)
-                        2 -> getString(R.string.pref_htmlprovider_textise)
-                        else -> getString(R.string.pref_htmlprovider_original_url)
-                    }
-                    setHtmlProvider(newValue)
-                    notifyDataSetChanged()
-                }
-                .show()
-        }
-        
         private fun showHtmlViewerDialog() {
-            val options = arrayOf("Android Webview", "Custom Tab", "System Browser", "GeckoView")
-            val currentIndex = when (Settings.getHtmlViewer(this@SettingsActivity)) {
-                getString(R.string.pref_htmlviewer_customtabs) -> 1
-                getString(R.string.pref_htmlviewer_browser) -> 2
-                getString(R.string.pref_htmlviewer_geckoview) -> 3
-                else -> 0
-            }
+            val options = arrayOf(
+                getString(R.string.pref_htmlviewer_geckoview),
+                getString(R.string.pref_htmlviewer_browser)
+            )
+            val currentIndex = if (Settings.getHtmlViewer(this@SettingsActivity) ==
+                getString(R.string.pref_htmlviewer_browser)
+            ) 1 else 0
             
             AlertDialog.Builder(this@SettingsActivity)
                 .setTitle("HTML Viewer")
                 .setSingleChoiceItems(options, currentIndex) { _, which ->
-                    val newValue = when (which) {
-                        1 -> getString(R.string.pref_htmlviewer_customtabs)
-                        2 -> getString(R.string.pref_htmlviewer_browser)
-                        3 -> getString(R.string.pref_htmlviewer_geckoview)
-                        else -> getString(R.string.pref_htmlviewer_app)
+                    val newValue = if (which == 1) {
+                        getString(R.string.pref_htmlviewer_browser)
+                    } else {
+                        getString(R.string.pref_htmlviewer_geckoview)
                     }
                     setHtmlViewer(newValue)
                     notifyDataSetChanged()
@@ -241,21 +209,8 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         
-        private fun getHtmlProviderSummary(): String {
-            return when (Settings.getHtmlProvider(this@SettingsActivity)) {
-                getString(R.string.pref_htmlprovider_instapaper) -> "Instapaper"
-                getString(R.string.pref_htmlprovider_textise) -> "Textise"
-                else -> "Original URL"
-            }
-        }
-        
         private fun getHtmlViewerSummary(): String {
-            return when (Settings.getHtmlViewer(this@SettingsActivity)) {
-                getString(R.string.pref_htmlviewer_customtabs) -> "Custom Tab"
-                getString(R.string.pref_htmlviewer_browser) -> "System Browser"
-                getString(R.string.pref_htmlviewer_geckoview) -> "GeckoView"
-                else -> "Android Webview"
-            }
+            return Settings.getHtmlViewer(this@SettingsActivity)
         }
         
         private fun getUserSummary(): String {
@@ -266,11 +221,6 @@ class SettingsActivity : AppCompatActivity() {
         private fun setFontSize(value: String) {
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(this@SettingsActivity)
             sharedPref.edit().putString(Settings.PREF_FONTSIZE, value).apply()
-        }
-        
-        private fun setHtmlProvider(value: String) {
-            val sharedPref = PreferenceManager.getDefaultSharedPreferences(this@SettingsActivity)
-            sharedPref.edit().putString(Settings.PREF_HTMLPROVIDER, value).apply()
         }
         
         private fun setHtmlViewer(value: String) {

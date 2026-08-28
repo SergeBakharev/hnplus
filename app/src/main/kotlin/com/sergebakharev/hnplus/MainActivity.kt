@@ -1,11 +1,9 @@
 package com.sergebakharev.hnplus
 
 import android.app.AlertDialog
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -19,7 +17,6 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.MenuItemCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.sergebakharev.hnplus.databinding.MainBinding
@@ -31,7 +28,6 @@ import com.sergebakharev.hnplus.task.HNFeedTaskLoadMore
 import com.sergebakharev.hnplus.task.HNFeedTaskMainFeed
 import com.sergebakharev.hnplus.task.HNVoteTask
 import com.sergebakharev.hnplus.task.ITaskFinishedHandler
-import com.sergebakharev.hnplus.util.CustomTabActivityHelper
 import com.sergebakharev.hnplus.util.FileUtil
 import com.sergebakharev.hnplus.util.FontHelper
 import java.lang.reflect.Field
@@ -401,18 +397,12 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
                         } else {
                             when (Settings.getHtmlViewer(this@MainActivity)) {
                                 getString(R.string.pref_htmlviewer_browser) -> {
-                                    getItem(position)?.let { post ->
-                                        openURLInBrowser(getArticleViewURL(post), this@MainActivity)
+                                    getItem(position)?.uRL?.let { url ->
+                                        openURLInBrowser(url, this@MainActivity)
                                     }
                                 }
-                                getString(R.string.pref_htmlviewer_customtabs) -> {
-                                    openURLInCustomTabs(getItem(position), null, this@MainActivity)
-                                }
-                                getString(R.string.pref_htmlviewer_geckoview) -> {
-                                    openPostInGeckoView(getItem(position), null, this@MainActivity, false)
-                                }
                                 else -> {
-                                    openPostInApp(getItem(position), null, this@MainActivity)
+                                    openPostInGeckoView(getItem(position), this@MainActivity, false)
                                 }
                             }
                         }
@@ -483,13 +473,7 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
             } else {
                 mItems.add(getString(R.string.already_upvoted))
             }
-            mItems.addAll(listOf(
-                getString(R.string.pref_htmlprovider_original_url),
-                getString(R.string.pref_htmlprovider_instapaper),
-                getString(R.string.pref_htmlprovider_textise),
-                getString(R.string.external_browser),
-                getString(R.string.share_article_url)
-            ))
+            mItems.add(getString(R.string.external_browser))
         }
         
         override fun getCount(): Int = mItems.size
@@ -502,7 +486,7 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
         override fun registerDataSetObserver(observer: android.database.DataSetObserver) {}
         override fun unregisterDataSetObserver(observer: android.database.DataSetObserver) {}
         override fun areAllItemsEnabled(): Boolean = false
-        override fun isEnabled(position: Int): Boolean = !(!mUpVotingEnabled && position == 4)
+        override fun isEnabled(position: Int): Boolean = mUpVotingEnabled || position != 0
         
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             val view = mInflater.inflate(android.R.layout.simple_list_item_1, null) as TextView
@@ -522,23 +506,12 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
                         vote(mPost.getUpvoteURL(Settings.getUserName(this@MainActivity)), mPost)
                     }
                 }
-                1, 2, 3, 4 -> {
-                    openPostInApp(mPost, getItem(item).toString(), this@MainActivity)
+                1 -> {
+                    mPost.uRL?.let { openURLInBrowser(it, this@MainActivity) }
                     markAsRead(mPost)
-                }
-                5 -> {
-                    openURLInBrowser(getArticleViewURL(mPost), this@MainActivity)
-                    markAsRead(mPost)
-                }
-                6 -> {
-                    shareUrl(mPost, this@MainActivity)
                 }
             }
         }
-    }
-    
-    private fun getArticleViewURL(post: HNFeedPost?): String {
-        return ArticleReaderActivity.getArticleViewURL(post, Settings.getHtmlProvider(this), this)
     }
     
     companion object {
@@ -547,58 +520,16 @@ class MainActivity : BaseListActivity(), ITaskFinishedHandler<HNFeed?> {
             a.startActivity(browserIntent)
         }
         
-        fun openURLInCustomTabs(post: HNFeedPost?, overrideHtmlProvider: String?, a: android.app.Activity) {
-            post?.let { nonNullPost ->
-                val commentsIntent = Intent(a, CommentsActivity::class.java)
-                commentsIntent.putExtra(CommentsActivity.EXTRA_HNPOST, nonNullPost)
-                
-                var flags = PendingIntent.FLAG_CANCEL_CURRENT
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                    flags = flags or PendingIntent.FLAG_IMMUTABLE
-                }
-                
-                val pendingIntent = PendingIntent.getActivity(a, 1, commentsIntent, flags)
-                val icon = BitmapFactory.decodeResource(a.resources, R.drawable.ic_launcher)
-                
-                val builder = CustomTabsIntent.Builder()
-                builder.setActionButton(icon, a.getString(R.string.comments), pendingIntent)
-                val customTabsIntent = builder.build()
-                CustomTabActivityHelper.openCustomTab(a, customTabsIntent, nonNullPost, overrideHtmlProvider, ArticleReaderActivity())
-            }
-        }
-        
-        fun openPostInApp(post: HNFeedPost?, overrideHtmlProvider: String?, a: android.app.Activity) {
-            val i = Intent(a, ArticleReaderActivity::class.java)
-            i.putExtra(ArticleReaderActivity.EXTRA_HNPOST, post)
-            if (overrideHtmlProvider != null) {
-                i.putExtra(ArticleReaderActivity.EXTRA_HTMLPROVIDER_OVERRIDE, overrideHtmlProvider)
-            }
-            a.startActivity(i)
-        }
-        
-                fun openPostInGeckoView(post: HNFeedPost?, overrideHtmlProvider: String?, a: android.app.Activity, cameFromComments: Boolean = false) {
+        fun openPostInGeckoView(post: HNFeedPost?, a: android.app.Activity, cameFromComments: Boolean = false) {
             val i = Intent(a, GeckoViewActivity::class.java)
             i.putExtra(GeckoViewActivity.EXTRA_HNPOST, post)
-            if (overrideHtmlProvider != null) {
-                i.putExtra(GeckoViewActivity.EXTRA_HTMLPROVIDER_OVERRIDE, overrideHtmlProvider)
-            }
             i.putExtra(GeckoViewActivity.EXTRA_CAME_FROM_COMMENTS, cameFromComments)
             a.startActivity(i)
             
-            // Use slide up animation when coming from comments, default animation otherwise
             if (cameFromComments) {
                 a.overridePendingTransition(R.anim.slide_up_in, R.anim.slide_down_out)
-                // Finish the CommentsActivity so back button goes to MainActivity
                 a.finish()
             }
-        }
-        
-        fun shareUrl(post: HNFeedPost?, a: android.app.Activity) {
-            val shareIntent = Intent(Intent.ACTION_SEND)
-            shareIntent.type = "text/plain"
-            shareIntent.putExtra(Intent.EXTRA_SUBJECT, post?.title)
-            shareIntent.putExtra(Intent.EXTRA_TEXT, post?.uRL ?: "")
-            a.startActivity(Intent.createChooser(shareIntent, a.getString(R.string.share_article_url)))
         }
     }
     
