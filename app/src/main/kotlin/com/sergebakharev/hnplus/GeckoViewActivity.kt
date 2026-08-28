@@ -173,7 +173,7 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
         // Install uBlock Origin and assign a PromptDelegate
         mGeckoRuntime?.webExtensionController?.promptDelegate = BlockifyPromptDelegate()
         mGeckoRuntime?.webExtensionController
-            ?.install("resource://android/assets/extensions/uBlock0_1.64.0.firefox.signed.xpi")
+            ?.install("resource://android/assets/extensions/uBlock0_1.74.0.firefox.signed.xpi")
             ?.accept(
                 { extension ->
                     Log.i("MessageDelegate", "Extension installed: $extension")
@@ -202,14 +202,26 @@ class BlockifyPromptDelegate : WebExtensionController.PromptDelegate {
     override fun onInstallPromptRequest(
         extension: WebExtension,
         permissions: Array<out String?>,
-        origins: Array<out String?>
+        origins: Array<out String?>,
+        dataCollectionPermissions: Array<out String?>
     ): GeckoResult<WebExtension.PermissionPromptResponse?>? {
         val name = extension.metaData.name
         if (name != null && name == "uBlock Origin") {
             Log.i("PromptDelegate", "Allow uBlock Origin")
-            return GeckoResult.fromValue(WebExtension.PermissionPromptResponse(true, true))
+            return GeckoResult.fromValue(
+                WebExtension.PermissionPromptResponse(
+                    true,
+                    true,
+                    false
+                )
+            )
         }
-        return super.onInstallPromptRequest(extension, permissions, origins)
+        return super.onInstallPromptRequest(
+            extension,
+            permissions,
+            origins,
+            dataCollectionPermissions
+        )
     }
 }
     
