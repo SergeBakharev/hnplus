@@ -13,6 +13,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuItemCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -72,6 +73,11 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
         setContentView(binding.root)
         
         mInflater = layoutInflater
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackNavigation()
+            }
+        })
         init()
     }
     
@@ -258,12 +264,6 @@ class BlockifyPromptDelegate : WebExtensionController.PromptDelegate {
     
     private fun toggleSwipeRefreshLayout() {
         binding.geckoviewSwiperefreshlayout.isEnabled = Settings.isPullDownRefresh(this)
-    }
-    
-    override fun onBackPressed() {
-        // Note: canGoBack() is not available in this version of GeckoView
-        // We'll just handle back navigation normally
-        handleBackNavigation()
     }
     
     override fun onDestroy() {

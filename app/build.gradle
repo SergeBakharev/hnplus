@@ -29,15 +29,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    compileSdkVersion 36
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+    compileSdk 36
     buildFeatures {
         viewBinding true
     }
     defaultConfig {
         applicationId "com.sergebakharev.hnplus"
-        minSdkVersion 21
-        targetSdkVersion 36
-        versionCode 9
+        minSdk 21
+        targetSdk 36
+        versionCode 10
         versionName project.hasProperty("versionName") ? project.property("versionName") : "0.0.0"
     }
     signingConfigs {

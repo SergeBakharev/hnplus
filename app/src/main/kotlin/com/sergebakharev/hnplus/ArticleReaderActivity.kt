@@ -14,6 +14,7 @@ import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuItemCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -71,6 +72,15 @@ class ArticleReaderActivity : AppCompatActivity(), CustomTabActivityHelper.Custo
         }
         
         mInflater = layoutInflater
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.articleWebview.canGoBack()) {
+                    binding.articleWebview.goBack()
+                } else {
+                    handleBackNavigation()
+                }
+            }
+        })
         init()
     }
     
@@ -219,14 +229,6 @@ class ArticleReaderActivity : AppCompatActivity(), CustomTabActivityHelper.Custo
     
     private fun toggleSwipeRefreshLayout() {
         binding.articleSwiperefreshlayout.isEnabled = Settings.isPullDownRefresh(this)
-    }
-    
-    override fun onBackPressed() {
-        if (binding.articleWebview.canGoBack()) {
-            binding.articleWebview.goBack()
-        } else {
-            handleBackNavigation()
-        }
     }
     
     override fun onSaveInstanceState(outState: Bundle) {
