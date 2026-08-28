@@ -7,6 +7,8 @@
 - Changed: Raised minimum Android version to 8.0 (API 26)
 - Changed: Settings titles use the same system font and unread-post colour as the main feed
 - Fixed: Settings screen swipe-down refresh spinner looping forever
+- Removed: HTML Provider setting (Instapaper Text and Textise)
+- Removed: Android Webview and Custom Tab article viewers
 
 ## 0.1.10
 - Changed: Targeting Android 16 (API 36) for Google Play

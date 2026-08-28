@@ -21,7 +21,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.MenuItemCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.sergebakharev.hnplus.databinding.CommentsActivityBinding
@@ -34,7 +33,6 @@ import com.sergebakharev.hnplus.reuse.LinkifiedTextView
 import com.sergebakharev.hnplus.task.HNPostCommentsTask
 import com.sergebakharev.hnplus.task.HNVoteTask
 import com.sergebakharev.hnplus.task.ITaskFinishedHandler
-import com.sergebakharev.hnplus.util.CustomTabActivityHelper
 import com.sergebakharev.hnplus.util.DisplayHelper
 import com.sergebakharev.hnplus.util.FileUtil
 import com.sergebakharev.hnplus.util.FontHelper
@@ -118,14 +116,7 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
         mActionbarTitle?.setOnClickListener {
             when (Settings.getHtmlViewer(this)) {
                 getString(R.string.pref_htmlviewer_browser) -> {
-                    val articleURL = ArticleReaderActivity.getArticleViewURL(mPost, Settings.getHtmlProvider(this), this)
-                    MainActivity.openURLInBrowser(articleURL, this)
-                }
-                getString(R.string.pref_htmlviewer_customtabs) -> {
-                    MainActivity.openURLInCustomTabs(mPost, null, this)
-                }
-                getString(R.string.pref_htmlviewer_geckoview) -> {
-                    MainActivity.openPostInGeckoView(mPost, null, this, true)
+                    mPost?.uRL?.let { MainActivity.openURLInBrowser(it, this) }
                 }
                 else -> {
                     openArticleReader()
@@ -332,12 +323,7 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
     }
     
     private fun openArticleReader() {
-        mPost?.let { post ->
-            val i = Intent(this, ArticleReaderActivity::class.java)
-            i.putExtra(ArticleReaderActivity.EXTRA_HNPOST, post)
-            i.putExtra(ArticleReaderActivity.EXTRA_CAME_FROM_COMMENTS, true)
-            startActivity(i)
-        }
+        MainActivity.openPostInGeckoView(mPost, this, true)
     }
     
     private fun initCommentsHeader() {

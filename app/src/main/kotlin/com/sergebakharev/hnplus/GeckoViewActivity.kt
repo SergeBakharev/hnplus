@@ -1,9 +1,7 @@
 package com.sergebakharev.hnplus
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,31 +9,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.MenuItemCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.sergebakharev.hnplus.databinding.GeckoviewActivityBinding
 import com.sergebakharev.hnplus.model.HNFeedPost
-import com.sergebakharev.hnplus.util.CustomTabActivityHelper
 import com.sergebakharev.hnplus.util.FontHelper
 import com.sergebakharev.hnplus.util.SpotlightActivity
 import com.sergebakharev.hnplus.util.ViewedUtils
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
-import org.mozilla.geckoview.GeckoView
-import org.mozilla.geckoview.WebRequestError
-import java.net.URLEncoder
 
-class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTabFallback {
+class GeckoViewActivity : AppCompatActivity() {
     private lateinit var binding: GeckoviewActivityBinding
     private lateinit var mInflater: LayoutInflater
     
     private var mActionbarTitle: TextView? = null
     private var mPost: HNFeedPost? = null
-    private var mHtmlProvider: String? = null
     private var mShouldShowRefreshing = false
     private var mGeckoSession: GeckoSession? = null
     private var mGeckoRuntime: GeckoRuntime? = null
@@ -45,23 +35,7 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
     
     companion object {
         const val EXTRA_HNPOST = "HNPOST"
-        const val EXTRA_HTMLPROVIDER_OVERRIDE = "HTMLPROVIDER_OVERRIDE"
         const val EXTRA_CAME_FROM_COMMENTS = "CAME_FROM_COMMENTS"
-        
-        private const val HTMLPROVIDER_PREFIX_INSTAPAPER = "https://www.instapaper.com/text?u="
-        private const val HTMLPROVIDER_PRFIX_TEXTISE = "https://www.textise.net/showText.aspx?strURL="
-        
-        @Suppress("DEPRECATION")
-        fun getArticleViewURL(post: HNFeedPost?, htmlProvider: String?, c: Context): String {
-            if (post?.uRL == null) return ""
-            
-            val encodedURL = URLEncoder.encode(post.uRL!!)
-            return when (htmlProvider) {
-                c.getString(R.string.pref_htmlprovider_instapaper) -> HTMLPROVIDER_PREFIX_INSTAPAPER + encodedURL
-                c.getString(R.string.pref_htmlprovider_textise) -> HTMLPROVIDER_PRFIX_TEXTISE + encodedURL
-                else -> post.uRL!!
-            }
-        }
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,23 +70,12 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
         
         // Initialize GeckoView with uBlock Origin extension
         initGeckoView()
-        
-        if (mPost != null && mPost?.uRL != null) {
-            val htmlProviderOverride = intent.getStringExtra(EXTRA_HTMLPROVIDER_OVERRIDE)
-            mHtmlProvider = htmlProviderOverride ?: Settings.getHtmlProvider(this)
-            mHtmlProvider?.let { provider ->
-                val url = getArticleViewURL(mPost, provider, this)
-                mGeckoSession?.loadUri(url)
-            }
-        }
+        loadArticle()
         
         toggleSwipeRefreshLayout()
         
         binding.geckoviewSwiperefreshlayout.setOnRefreshListener {
-            mHtmlProvider?.let { provider ->
-                val url = getArticleViewURL(mPost, provider, this)
-                mGeckoSession?.loadUri(url)
-            }
+            loadArticle()
         }
     }
     
@@ -200,10 +163,7 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
             val actionView = item.actionView
             if (actionView != null) {
                 actionView.setOnClickListener {
-                    mHtmlProvider?.let { provider ->
-                        val url = getArticleViewURL(mPost, provider, this)
-                        mGeckoSession?.loadUri(url)
-                    }
+                    loadArticle()
                 }
             }
         }
@@ -218,10 +178,7 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
                 true
             }
             R.id.menu_refresh -> {
-                mHtmlProvider?.let { provider ->
-                    val url = getArticleViewURL(mPost, provider, this)
-                    mGeckoSession?.loadUri(url)
-                }
+                loadArticle()
                 true
             }
             R.id.menu_share -> {
@@ -264,12 +221,13 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
     private fun launchCommentsActivity() {
         val i = Intent(this, CommentsActivity::class.java)
         i.putExtra(CommentsActivity.EXTRA_HNPOST, mPost)
-        intent.getStringExtra(EXTRA_HTMLPROVIDER_OVERRIDE)?.let { override ->
-            i.putExtra(EXTRA_HTMLPROVIDER_OVERRIDE, override)
-        }
         startActivity(i)
         overridePendingTransition(R.anim.slide_down_in, R.anim.slide_up_out)
         finish()
+    }
+    
+    private fun loadArticle() {
+        mPost?.uRL?.let { mGeckoSession?.loadUri(it) }
     }
     
     private fun setShowRefreshing(showRefreshing: Boolean) {
@@ -281,14 +239,5 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
         if (binding.geckoviewSwiperefreshlayout.isEnabled && (!binding.geckoviewSwiperefreshlayout.isRefreshing || !showRefreshing)) {
             binding.geckoviewSwiperefreshlayout.isRefreshing = showRefreshing
         }
-    }
-    
-    override fun openUri(activity: android.app.Activity, post: HNFeedPost?, overrideHtmlProvider: String?) {
-        val i = Intent(activity, GeckoViewActivity::class.java)
-        i.putExtra(EXTRA_HNPOST, post)
-        if (overrideHtmlProvider != null) {
-            i.putExtra(EXTRA_HTMLPROVIDER_OVERRIDE, overrideHtmlProvider)
-        }
-        activity.startActivity(i)
     }
 } 

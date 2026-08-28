@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 
 object Settings {
     const val PREF_FONTSIZE = "pref_fontsize"
-    const val PREF_HTMLPROVIDER = "pref_htmlprovider"
     const val PREF_HTMLVIEWER = "pref_htmlviewer"
     const val PREF_USER = "pref_user"
     const val PREF_PULLDOWNREFRESH = "pref_pulldownrefresh"
@@ -22,14 +21,11 @@ object Settings {
         return sharedPref.getString(PREF_FONTSIZE, c.getString(R.string.pref_default_fontsize)) ?: c.getString(R.string.pref_default_fontsize)
     }
 
-    fun getHtmlProvider(c: Context): String {
-        val sharedPref = getSharedPreferences(c)
-        return sharedPref.getString(PREF_HTMLPROVIDER, c.getString(R.string.pref_default_htmlprovider)) ?: c.getString(R.string.pref_default_htmlprovider)
-    }
-
     fun getHtmlViewer(c: Context): String {
         val sharedPref = getSharedPreferences(c)
-        return sharedPref.getString(PREF_HTMLVIEWER, c.getString(R.string.pref_default_htmlviewer)) ?: c.getString(R.string.pref_default_htmlviewer)
+        val browser = c.getString(R.string.pref_htmlviewer_browser)
+        val stored = sharedPref.getString(PREF_HTMLVIEWER, null)
+        return if (stored == browser) browser else c.getString(R.string.pref_htmlviewer_geckoview)
     }
 
     fun isPullDownRefresh(c: Context): Boolean {
