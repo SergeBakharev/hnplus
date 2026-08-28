@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.10
+- Changed: Targeting Android 16 (API 36) for Google Play
+- Fixed: Align Kotlin JVM bytecode with Java 17 so the project builds on JDK 21
+- Fixed: Migrate system back handling to OnBackPressedDispatcher (required on Android 16)
+
 ## 0.1.9
 - Changed: Updated target SDK version to 36
 - Changed: Dependencies updated
