@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.sergebakharev.hnplus.login.LoginActivity
 import com.sergebakharev.hnplus.server.HNCredentials
 import com.sergebakharev.hnplus.util.DisplayHelper
-import com.sergebakharev.hnplus.util.FontHelper
 import com.sergebakharev.hnplus.Settings
 
 class SettingsActivity : AppCompatActivity() {
@@ -47,7 +46,6 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.settings)
         
         mActionbarTitle = supportActionBar?.customView?.findViewById(R.id.actionbar_title)
-        mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
         mActionbarTitle?.text = getString(R.string.settings)
         
         // Initialize settings
@@ -100,10 +98,8 @@ class SettingsActivity : AppCompatActivity() {
             val summaryView = view.findViewById<TextView>(R.id.settings_item_summary)
             
             titleView.text = item.title
-            titleView.typeface = FontHelper.getComfortaa(this@SettingsActivity, true)
-            titleView.setTextColor(resources.getColor(android.R.color.black))
+            titleView.setTextColor(resources.getColor(R.color.dark_gray_post_title, null))
             
-            summaryView.typeface = FontHelper.getComfortaa(this@SettingsActivity, false)
             summaryView.setTextColor(Color.parseColor("#787067"))
             if (item.summary.isEmpty()) {
                 summaryView.visibility = View.GONE
