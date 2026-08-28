@@ -26,6 +26,8 @@
     <string name="no_url">No URL Defined</string>
     <string name="about_by">by Serge Industries</string>
     <string name="settings_user">User</string>
+    <string name="settings_ublock">uBlock Origin Settings</string>
+    <string name="settings_ublock_summary">Configure ad blocking</string>
     <string name="settings_username">Username</string>
     <string name="settings_password">Password</string>
     <string name="refresh">Refresh</string>
@@ -47,6 +49,7 @@
     <string name="error_unable_to_retrieve_comments">We were unable to retrieve the latest comments for this post.</string>
     <string name="error_unable_to_retrieve_feed">We were unable to update the posts feed</string>
     <string name="error_unable_to_load_more">We were unable to load more articles</string>
+    <string name="error_ublock_settings">Could not open uBlock Origin settings.</string>
     <string name="logout_question_lbl">Are you sure you want to logout from HN?</string>
     <string name="ok">Ok</string>
 </resources> 

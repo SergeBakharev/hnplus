@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+- Added: uBlock Origin Settings on the Settings screen
+- Changed: Updated uBlock Origin to 1.74.0
+- Changed: Updated GeckoView to 154
+- Changed: Raised minimum Android version to 8.0 (API 26)
+- Changed: Settings titles use the same system font and unread-post colour as the main feed
+- Fixed: Settings screen swipe-down refresh spinner looping forever
+
 ## 0.1.10
 - Changed: Targeting Android 16 (API 36) for Google Play
 - Fixed: Align Kotlin JVM bytecode with Java 17 so the project builds on JDK 21

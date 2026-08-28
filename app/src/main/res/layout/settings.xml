@@ -6,21 +6,14 @@
     android:orientation="vertical"
     android:fitsSystemWindows="true" >
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/settings_swiperefreshlayout"
+    <ListView
+        android:id="@+id/settings_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <ListView
-            android:id="@+id/settings_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/peach"
-            android:cacheColorHint="@color/peach"
-            android:divider="#f0dfce"
-            android:dividerHeight="1dp"
-            android:fadingEdge="none" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        android:layout_height="match_parent"
+        android:background="@color/peach"
+        android:cacheColorHint="@color/peach"
+        android:divider="#f0dfce"
+        android:dividerHeight="1dp"
+        android:fadingEdge="none" />
 
 </LinearLayout>
