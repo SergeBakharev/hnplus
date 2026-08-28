@@ -55,9 +55,6 @@ class SettingsActivity : AppCompatActivity() {
         mSettingsList = findViewById(R.id.settings_list)
         mSettingsAdapter = SettingsAdapter()
         mSettingsList?.adapter = mSettingsAdapter
-        
-        // Prevent overlapping with action bar
-        val swipeRefreshLayout = findViewById<androidx.swiperefreshlayout.widget.SwipeRefreshLayout>(R.id.settings_swiperefreshlayout)
     }
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -86,7 +83,8 @@ class SettingsActivity : AppCompatActivity() {
             SettingsItem("Font Size", getFontSizeSummary(), 0),
             SettingsItem("HTML Provider", getHtmlProviderSummary(), 1),
             SettingsItem("HTML Viewer", getHtmlViewerSummary(), 2),
-            SettingsItem("User", getUserSummary(), 3)
+            SettingsItem("User", getUserSummary(), 3),
+            SettingsItem(getString(R.string.settings_ublock), getString(R.string.settings_ublock_summary), 4)
         )
         
         override fun getCount(): Int = settingsItems.size
@@ -105,9 +103,14 @@ class SettingsActivity : AppCompatActivity() {
             titleView.typeface = FontHelper.getComfortaa(this@SettingsActivity, true)
             titleView.setTextColor(resources.getColor(android.R.color.black))
             
-            summaryView.text = item.summary
             summaryView.typeface = FontHelper.getComfortaa(this@SettingsActivity, false)
             summaryView.setTextColor(Color.parseColor("#787067"))
+            if (item.summary.isEmpty()) {
+                summaryView.visibility = View.GONE
+            } else {
+                summaryView.visibility = View.VISIBLE
+                summaryView.text = item.summary
+            }
             
             val fontSize = Settings.getFontSize(this@SettingsActivity)
             val titleSize = when (fontSize) {
@@ -137,6 +140,7 @@ class SettingsActivity : AppCompatActivity() {
                 1 -> showHtmlProviderDialog()
                 2 -> showHtmlViewerDialog()
                 3 -> handleUserClick()
+                4 -> openUBlockSettings()
             }
         }
         
@@ -208,6 +212,10 @@ class SettingsActivity : AppCompatActivity() {
                 .show()
         }
         
+        private fun openUBlockSettings() {
+            startActivity(Intent(this@SettingsActivity, UBlockSettingsActivity::class.java))
+        }
+
         private fun handleUserClick() {
             val userName = Settings.getUserName(this@SettingsActivity)
             if (userName.isNullOrEmpty()) {

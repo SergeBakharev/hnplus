@@ -95,6 +95,11 @@
         <activity android:name=".GeckoViewActivity" 
             android:theme="@style/ActionBar.White"
             android:windowSoftInputMode="stateUnspecified|adjustResize" />
+        <activity
+            android:name=".UBlockSettingsActivity"
+            android:theme="@style/ActionBar.Orange.Back"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:windowSoftInputMode="stateUnspecified|adjustResize" />
 
     </application>
 

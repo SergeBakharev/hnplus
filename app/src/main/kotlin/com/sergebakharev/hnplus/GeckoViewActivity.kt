@@ -26,10 +26,7 @@ import com.sergebakharev.hnplus.util.ViewedUtils
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
 import org.mozilla.geckoview.GeckoView
-import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.WebRequestError
-import org.mozilla.geckoview.WebExtension
-import org.mozilla.geckoview.WebExtensionController
 import java.net.URLEncoder
 
 class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTabFallback {
@@ -170,11 +167,8 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
         mGeckoRuntime?.let { runtime ->
             mGeckoSession?.open(runtime)
         }
-        // Install uBlock Origin and assign a PromptDelegate
-        mGeckoRuntime?.webExtensionController?.promptDelegate = BlockifyPromptDelegate()
-        mGeckoRuntime?.webExtensionController
-            ?.install("resource://android/assets/extensions/uBlock0_1.74.0.firefox.signed.xpi")
-            ?.accept(
+        mGeckoRuntime?.let { runtime ->
+            UBlockOrigin.ensureInstalled(runtime).accept(
                 { extension ->
                     Log.i("MessageDelegate", "Extension installed: $extension")
                 },
@@ -182,6 +176,7 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
                     Log.e("MessageDelegate", "Error registering WebExtension", e)
                 }
             )
+        }
         // Set session to GeckoView
         mGeckoSession?.let { session ->
             binding.geckoview.setSession(session)
@@ -197,34 +192,6 @@ class GeckoViewActivity : AppCompatActivity(), CustomTabActivityHelper.CustomTab
         })
     }
 
-// Add the BlockifyPromptDelegate class
-class BlockifyPromptDelegate : WebExtensionController.PromptDelegate {
-    override fun onInstallPromptRequest(
-        extension: WebExtension,
-        permissions: Array<out String?>,
-        origins: Array<out String?>,
-        dataCollectionPermissions: Array<out String?>
-    ): GeckoResult<WebExtension.PermissionPromptResponse?>? {
-        val name = extension.metaData.name
-        if (name != null && name == "uBlock Origin") {
-            Log.i("PromptDelegate", "Allow uBlock Origin")
-            return GeckoResult.fromValue(
-                WebExtension.PermissionPromptResponse(
-                    true,
-                    true,
-                    false
-                )
-            )
-        }
-        return super.onInstallPromptRequest(
-            extension,
-            permissions,
-            origins,
-            dataCollectionPermissions
-        )
-    }
-}
-    
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_share_refresh, menu)
         
