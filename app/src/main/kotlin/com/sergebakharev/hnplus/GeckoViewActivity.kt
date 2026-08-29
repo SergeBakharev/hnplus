@@ -10,13 +10,13 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.sergebakharev.hnplus.databinding.GeckoviewActivityBinding
 import com.sergebakharev.hnplus.model.HNFeedPost
 import com.sergebakharev.hnplus.util.FontHelper
 import com.sergebakharev.hnplus.util.SpotlightActivity
 import com.sergebakharev.hnplus.util.ViewedUtils
+import com.sergebakharev.hnplus.util.installActionBarBackOnSwipe
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
 
@@ -44,11 +44,7 @@ class GeckoViewActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         mInflater = layoutInflater
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                handleBackNavigation()
-            }
-        })
+        installActionBarBackOnSwipe { handleBackNavigation() }
         init()
     }
     

@@ -6,6 +6,7 @@ import android.text.method.LinkMovementMethod
 import androidx.appcompat.app.AppCompatActivity
 import com.sergebakharev.hnplus.databinding.AboutBinding
 import com.sergebakharev.hnplus.util.FontHelper
+import com.sergebakharev.hnplus.util.installActionBarBackOnSwipe
 
 class AboutActivity : AppCompatActivity() {
     private lateinit var binding: AboutBinding
@@ -14,6 +15,7 @@ class AboutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = AboutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        installActionBarBackOnSwipe()
 
         // Set custom font for the HN title
         binding.aboutHn.typeface = FontHelper.getComfortaa(this, true)
@@ -35,7 +37,7 @@ class AboutActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed()
+        finish()
         return true
     }
 
