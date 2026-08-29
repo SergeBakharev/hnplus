@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.sergebakharev.hnplus.login.LoginActivity
 import com.sergebakharev.hnplus.server.HNCredentials
 import com.sergebakharev.hnplus.util.DisplayHelper
+import com.sergebakharev.hnplus.util.installActionBarBackOnSwipe
 import com.sergebakharev.hnplus.Settings
 
 class SettingsActivity : AppCompatActivity() {
@@ -37,6 +38,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings)
+        installActionBarBackOnSwipe()
         
         mActionbarTitle = supportActionBar?.customView?.findViewById(R.id.actionbar_title)
         mActionbarTitle?.text = getString(R.string.settings)

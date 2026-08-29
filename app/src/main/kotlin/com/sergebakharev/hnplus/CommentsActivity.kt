@@ -38,6 +38,7 @@ import com.sergebakharev.hnplus.util.FileUtil
 import com.sergebakharev.hnplus.util.FontHelper
 import com.sergebakharev.hnplus.util.SpotlightActivity
 import com.sergebakharev.hnplus.util.ViewedUtils
+import com.sergebakharev.hnplus.util.installActionBarBackOnSwipe
 import java.util.*
 import android.content.DialogInterface
 
@@ -84,6 +85,7 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
         setContentView(binding.root)
         
         mInflater = layoutInflater
+        installActionBarBackOnSwipe()
         init()
     }
     

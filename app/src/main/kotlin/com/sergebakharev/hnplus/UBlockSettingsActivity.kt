@@ -5,10 +5,10 @@ import android.util.Log
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.sergebakharev.hnplus.databinding.UblockSettingsActivityBinding
 import com.sergebakharev.hnplus.util.FontHelper
+import com.sergebakharev.hnplus.util.installActionBarBackOnSwipe
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoSession
 
@@ -27,11 +27,7 @@ class UBlockSettingsActivity : AppCompatActivity() {
         mActionbarTitle?.typeface = FontHelper.getComfortaa(this, true)
         mActionbarTitle?.text = getString(R.string.settings_ublock)
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                handleBackNavigation()
-            }
-        })
+        installActionBarBackOnSwipe { handleBackNavigation() }
 
         val session = GeckoSession()
         mGeckoSession = session

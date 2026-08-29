@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Fixed: System back swipe closes screens with the same animation as the action bar back button
 - Added: uBlock Origin Settings on the Settings screen
 - Changed: Updated uBlock Origin to 1.74.0
 - Changed: Updated GeckoView to 154
