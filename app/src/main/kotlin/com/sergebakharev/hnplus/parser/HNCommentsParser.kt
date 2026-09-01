@@ -27,6 +27,7 @@ class HNCommentsParser : BaseHTMLParser<HNPostComments?>() {
         val isDownvoted = false
         var upvoteUrl: String? = null
         var downvoteUrl: String? = null
+        var deleteUrl: String? = null
 
         val endParsing = false
         for (row in tableRows.indices) {
@@ -48,27 +49,29 @@ class HNCommentsParser : BaseHTMLParser<HNPostComments?>() {
 
             val comHeadElement = mainRowElement.select("span.comhead").first()
             author = comHeadElement.select("a[href*=user]").text()
-            timeAgo = comHeadElement.select("a[href*=item")
-                .text() //getFirstTextValueInElementChildren(comHeadElement);
-            //            if (timeAgoRaw.length() > 0)
-//                timeAgo = timeAgoRaw.substring(0, timeAgoRaw.indexOf("|"));
-            val urlElement = comHeadElement.select("a[href*=item]").first()
-            if (urlElement != null) url = urlElement.attr("href")
+            // Age lives in span.age. Do not use href*=item — delete-confirm links
+            // include goto=item?id= and would append "delete" to the timestamp.
+            val urlElement = comHeadElement.select("span.age a").first()
+                ?: comHeadElement.select("a[href^=item]").first()
+            url = urlElement?.attr("href")
+            timeAgo = urlElement?.text() ?: ""
+            if (url.isNullOrEmpty()) continue
 
             val levelSpacerWidth = rowLevelElement.select("img").first().attr("width")
             if (levelSpacerWidth != null) level = levelSpacerWidth.toInt() / 40
 
             val voteElements = tableRows[row].select("td:eq(1) a")
             upvoteUrl = getVoteUrl(voteElements.first())
+            downvoteUrl = if (voteElements.size > 1) getVoteUrl(voteElements[1]) else null
 
-            // We want to test for size because unlike first() calling .get(1)
-            // Will throw an error if there are not two elements
-            if (voteElements.size > 1) downvoteUrl = getVoteUrl(voteElements[1])
+            val deleteElement = mainRowElement.select("a[href*=delete-confirm]").first()
+                ?: tableRows[row].select("a[href*=delete-confirm]").first()
+            deleteUrl = deleteElement?.attr("href")?.let { HNHelper.resolveRelativeHNURL(it) }
 
             comments.add(
                 HNComment(
                     timeAgo, author,
-                    url!!, text, commentColor, level, isDownvoted, upvoteUrl, downvoteUrl
+                    url!!, text, commentColor, level, isDownvoted, upvoteUrl, downvoteUrl, deleteUrl
                 )
             )
 

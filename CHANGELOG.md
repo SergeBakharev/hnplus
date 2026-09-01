@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+- Added: Post comments and replies from the comments screen
+- Changed: Replies are written inline under the parent comment, then confirmed in a dialog
+- Added: Delete your own comments when Hacker News still allows it
+- Fixed: Own comments no longer show "delete" as part of the timestamp
+
 ## 0.1.11
 - Fixed: System back swipe closes screens with the same animation as the action bar back button
 - Added: uBlock Origin Settings on the Settings screen

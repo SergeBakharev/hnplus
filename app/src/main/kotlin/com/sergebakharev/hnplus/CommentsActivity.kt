@@ -8,21 +8,20 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Parcelable
+import android.text.Editable
 import android.text.Html
 import android.text.TextUtils
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuItemCompat
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.sergebakharev.hnplus.databinding.CommentsActivityBinding
 import com.sergebakharev.hnplus.login.LoginActivity
 import com.sergebakharev.hnplus.model.HNComment
@@ -30,6 +29,8 @@ import com.sergebakharev.hnplus.model.HNCommentTreeNode
 import com.sergebakharev.hnplus.model.HNFeedPost
 import com.sergebakharev.hnplus.model.HNPostComments
 import com.sergebakharev.hnplus.reuse.LinkifiedTextView
+import com.sergebakharev.hnplus.task.HNCommentDeleteTask
+import com.sergebakharev.hnplus.task.HNCommentPostTask
 import com.sergebakharev.hnplus.task.HNPostCommentsTask
 import com.sergebakharev.hnplus.task.HNVoteTask
 import com.sergebakharev.hnplus.task.ITaskFinishedHandler
@@ -68,10 +69,19 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
     
     private var mPendingVote: HNComment? = null
     private var mVotedComments: MutableSet<HNComment> = mutableSetOf()
+    private var mPendingReplyTo: HNComment? = null
+    private var mPendingAddComment = false
+    private var mShowComposeAfterLoad = false
+    private var mIsPostingComment = false
+    private var mIsComposing = false
+    private var mComposeParentId: String? = null
+    private var mComposeDraft = ""
     
     private var mShouldShowRefreshing = false
     
     private val TASKCODE_VOTE = 100
+    private val TASKCODE_POST_COMMENT = 101
+    private val TASKCODE_DELETE_COMMENT = 102
     private val ACTIVITY_LOGIN = 136
     private val ACTIVITY_SPOTLIGHT = 137
     
@@ -108,6 +118,7 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
         binding.commentsList.emptyView = mEmptyView
         // Add the header for "Ask HN" text. If there is no text, this will just be empty
         binding.commentsList.addHeaderView(mCommentHeader, null, false)
+        binding.commentsList.itemsCanFocus = true
         binding.commentsList.adapter = mCommentsListAdapter
         
         mActionbarTitle = supportActionBar?.customView?.findViewById(R.id.actionbar_title)
@@ -165,7 +176,7 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
     }
     
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_share_refresh, menu)
+        menuInflater.inflate(R.menu.menu_comments, menu)
         return super.onCreateOptionsMenu(menu)
     }
     
@@ -193,6 +204,10 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                 finish()
                 true
             }
+            R.id.menu_add_comment -> {
+                requestCompose(null)
+                true
+            }
             R.id.menu_share -> {
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 shareIntent.type = "text/plain"
@@ -217,6 +232,13 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
         }
         updateEmptyView()
         setShowRefreshing(false)
+        if (mShowComposeAfterLoad) {
+            mShowComposeAfterLoad = false
+            mPendingReplyTo = null
+            mPendingAddComment = false
+            mCommentsListAdapter?.notifyDataSetChanged()
+            scrollToCompose()
+        }
     }
     
     private fun showComments(comments: HNPostComments?) {
@@ -280,6 +302,114 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
     
     private fun vote(voteURL: String?, comment: HNComment) {
         HNVoteTask.start(voteURL, this, VoteTaskFinishedHandler(), TASKCODE_VOTE, comment)
+    }
+
+    private fun requestCompose(replyTo: HNComment?) {
+        if (!Settings.isUserLoggedIn(this)) {
+            mPendingReplyTo = replyTo
+            mPendingAddComment = replyTo == null
+            startActivityForResult(Intent(this, LoginActivity::class.java), ACTIVITY_LOGIN)
+            return
+        }
+        showComposeRow(replyTo)
+    }
+
+    private fun showComposeRow(replyTo: HNComment?) {
+        val parentId = replyTo?.commentId
+        if (mIsComposing && mComposeParentId == parentId) {
+            hideCompose()
+            return
+        }
+        mIsComposing = true
+        mComposeParentId = parentId
+        mCommentsListAdapter?.notifyDataSetChanged()
+        scrollToCompose()
+    }
+
+    private fun hideCompose() {
+        mIsComposing = false
+        mComposeParentId = null
+        mCommentsListAdapter?.notifyDataSetChanged()
+    }
+
+    private fun scrollToCompose() {
+        val adapter = mCommentsListAdapter ?: return
+        val index = adapter.composeRowIndex()
+        if (index < 0) return
+        val listIndex = index + binding.commentsList.headerViewsCount
+        binding.commentsList.post {
+            binding.commentsList.smoothScrollToPosition(listIndex)
+            val first = binding.commentsList.firstVisiblePosition
+            val child = binding.commentsList.getChildAt(listIndex - first)
+            child?.findViewById<EditText>(R.id.comments_compose_text)?.requestFocus()
+        }
+    }
+
+    private fun confirmPostComment() {
+        val text = mComposeDraft.trim()
+        if (text.isEmpty()) {
+            Toast.makeText(this, R.string.comment_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.confirm_post_comment)
+            .setMessage(text)
+            .setPositiveButton(R.string.post_comment) { _, _ ->
+                postComment(text)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun postComment(text: String) {
+        if (mIsPostingComment) return
+        val parentId = mComposeParentId ?: mPost?.postID
+        val storyId = mPost?.postID
+        if (parentId.isNullOrEmpty() || storyId.isNullOrEmpty()) {
+            Toast.makeText(this, R.string.comment_error, Toast.LENGTH_LONG).show()
+            return
+        }
+        mIsPostingComment = true
+        mCommentsListAdapter?.notifyDataSetChanged()
+        setShowRefreshing(true)
+        HNCommentPostTask.start(
+            text,
+            parentId,
+            storyId,
+            this,
+            CommentPostTaskFinishedHandler(),
+            TASKCODE_POST_COMMENT,
+            null
+        )
+    }
+
+    private fun confirmDeleteComment(comment: HNComment) {
+        val deleteUrl = comment.getDeleteUrl()
+        if (deleteUrl.isNullOrEmpty()) {
+            Toast.makeText(this, R.string.delete_error, Toast.LENGTH_LONG).show()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.confirm_delete_comment)
+            .setMessage(Html.fromHtml(comment.text).toString().trim().ifEmpty {
+                getString(R.string.confirm_delete_comment)
+            })
+            .setPositiveButton(R.string.delete_comment) { _, _ ->
+                deleteComment(deleteUrl)
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun deleteComment(deleteUrl: String) {
+        setShowRefreshing(true)
+        HNCommentDeleteTask.start(
+            deleteUrl,
+            this,
+            CommentDeleteTaskFinishedHandler(),
+            TASKCODE_DELETE_COMMENT,
+            null
+        )
     }
     
     override fun onRestoreInstanceState(state: Bundle) {
@@ -383,6 +513,13 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                     mItems.add(getString(R.string.please_log_in))
                 }
             }
+
+            if (mComment.commentId != null) {
+                mItems.add(getString(R.string.reply))
+            }
+            if (mComment.getDeleteUrl() != null) {
+                mItems.add(getString(R.string.delete_comment))
+            }
             
             if (mComment.treeNode?.isExpanded == true) {
                 mItems.add(getString(R.string.collapse_comment))
@@ -430,6 +567,12 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                     setCommentToUpvote(mComment)
                     startActivityForResult(Intent(applicationContext, LoginActivity::class.java), ACTIVITY_LOGIN)
                 }
+                clickedText == applicationContext.getString(R.string.reply) -> {
+                    requestCompose(mComment)
+                }
+                clickedText == applicationContext.getString(R.string.delete_comment) -> {
+                    confirmDeleteComment(mComment)
+                }
                 clickedText == applicationContext.getString(R.string.collapse_thread) -> {
                     val mRootNode = mComment.treeNode?.rootNode
                     mRootNode?.comment?.let { comment ->
@@ -460,56 +603,161 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
             }
         }
     }
+
+    inner class CommentPostTaskFinishedHandler : ITaskFinishedHandler<Boolean?> {
+        override fun onTaskFinished(taskCode: Int, code: ITaskFinishedHandler.TaskResultCode, result: Boolean?, tag: Any?) {
+            if (taskCode != TASKCODE_POST_COMMENT) return
+            mIsPostingComment = false
+            if (result == true) {
+                mComposeDraft = ""
+                hideCompose()
+                Toast.makeText(this@CommentsActivity, R.string.comment_success, Toast.LENGTH_SHORT).show()
+                startFeedLoading()
+            } else {
+                setShowRefreshing(false)
+                mCommentsListAdapter?.notifyDataSetChanged()
+                Toast.makeText(this@CommentsActivity, R.string.comment_error, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    inner class CommentDeleteTaskFinishedHandler : ITaskFinishedHandler<Boolean?> {
+        override fun onTaskFinished(taskCode: Int, code: ITaskFinishedHandler.TaskResultCode, result: Boolean?, tag: Any?) {
+            if (taskCode != TASKCODE_DELETE_COMMENT) return
+            if (result == true) {
+                Toast.makeText(this@CommentsActivity, R.string.delete_success, Toast.LENGTH_SHORT).show()
+                startFeedLoading()
+            } else {
+                setShowRefreshing(false)
+                Toast.makeText(this@CommentsActivity, R.string.delete_error, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
     
     inner class CommentsAdapter : BaseAdapter() {
-        override fun getCount(): Int = mComments.comments?.size ?: 0
-        
-        override fun getItem(position: Int): HNComment? = mComments.comments?.get(position)
-        
-        override fun getItemId(position: Int): Long = 0
-        
+        private val VIEW_TYPE_COMMENT = 0
+        private val VIEW_TYPE_COMPOSE = 1
+
+        override fun getCount(): Int = rows().size
+
+        override fun getItem(position: Int): Any = rows()[position]
+
+        override fun getItemId(position: Int): Long = position.toLong()
+
+        override fun getViewTypeCount(): Int = 2
+
+        override fun getItemViewType(position: Int): Int {
+            return when (rowAt(position)) {
+                is CommentListRow.Comment -> VIEW_TYPE_COMMENT
+                is CommentListRow.Compose -> VIEW_TYPE_COMPOSE
+            }
+        }
+
+        fun composeRowIndex(): Int = rows().indexOfFirst { it is CommentListRow.Compose }
+
+        private fun rows(): List<CommentListRow> {
+            val comments = mComments.comments ?: emptyList()
+            val rows = ArrayList<CommentListRow>()
+            if (mIsComposing && mComposeParentId == null) {
+                rows.add(CommentListRow.Compose(null, 0))
+            }
+            for (comment in comments) {
+                if (comment == null) continue
+                rows.add(CommentListRow.Comment(comment))
+                if (mIsComposing && mComposeParentId != null && comment.commentId == mComposeParentId) {
+                    rows.add(CommentListRow.Compose(comment, comment.commentLevel + 1))
+                }
+            }
+            return rows
+        }
+
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = convertView ?: mInflater.inflate(R.layout.comments_list_item, null)
-            val holder = if (view.tag == null) {
+            return when (val row = rowAt(position)) {
+                is CommentListRow.Comment -> bindCommentRow(row.comment, convertView, parent)
+                is CommentListRow.Compose -> bindComposeRow(row, convertView, parent)
+            }
+        }
+
+        private fun rowAt(position: Int): CommentListRow = rows()[position]
+
+        private fun bindCommentRow(comment: HNComment, convertView: View?, parent: ViewGroup): View {
+            val view = convertView ?: mInflater.inflate(R.layout.comments_list_item, parent, false)
+            val holder = if (view.tag is CommentViewHolder) {
+                view.tag as CommentViewHolder
+            } else {
                 CommentViewHolder().apply {
                     rootView = view
                     textView = view.findViewById(R.id.comments_list_item_text)
                     spacersContainer = view.findViewById(R.id.comments_list_item_spacerscontainer)
                     authorView = view.findViewById(R.id.comments_list_item_author)
                     timeAgoView = view.findViewById(R.id.comments_list_item_timeago)
+                    deleteView = view.findViewById(R.id.comments_list_item_delete)
                     expandView = view.findViewById(R.id.comments_list_item_expand)
                 }.also { view.tag = it }
-            } else {
-                view.tag as CommentViewHolder
             }
-            
-            val comment = getItem(position)
-            
+
             holder.setOnClickListener {
-                if (getItem(position)?.treeNode?.hasChildren() == true) {
-                    mComments.toggleCommentExpanded(getItem(position))
-                    mCommentsListAdapter?.notifyDataSetChanged()
+                if (comment.treeNode?.hasChildren() == true) {
+                    mComments.toggleCommentExpanded(comment)
+                    notifyDataSetChanged()
                 }
             }
-            
+
             holder.setOnLongClickListener {
-                val comment = getItem(position)
-                if (comment != null) {
-                    val builder = AlertDialog.Builder(this@CommentsActivity)
-                    val adapter = LongPressMenuListAdapter(comment)
-                    val dialog = builder.setAdapter(adapter, DialogInterface.OnClickListener { _, which ->
-                        adapter.onItemClick(which)
-                    }).create()
-                    dialog.setCanceledOnTouchOutside(true)
-                    dialog.show()
-                }
+                val builder = AlertDialog.Builder(this@CommentsActivity)
+                val adapter = LongPressMenuListAdapter(comment)
+                val dialog = builder.setAdapter(adapter, DialogInterface.OnClickListener { _, which ->
+                    adapter.onItemClick(which)
+                }).create()
+                dialog.setCanceledOnTouchOutside(true)
+                dialog.show()
                 true
             }
-            
-            holder.setComment(comment, mCommentLevelIndentPx, this@CommentsActivity, mFontSizeText, mFontSizeMetadata)
-            
+
+            holder.deleteView?.setOnClickListener {
+                confirmDeleteComment(comment)
+            }
+
+            holder.setComment(
+                comment,
+                mCommentLevelIndentPx,
+                this@CommentsActivity,
+                mFontSizeText,
+                mFontSizeMetadata
+            )
+
             return view
         }
+
+        private fun bindComposeRow(row: CommentListRow.Compose, convertView: View?, parent: ViewGroup): View {
+            val view = convertView ?: mInflater.inflate(R.layout.comments_compose_item, parent, false)
+            val holder = if (view.tag is ComposeViewHolder) {
+                view.tag as ComposeViewHolder
+            } else {
+                ComposeViewHolder().apply {
+                    rootView = view
+                    authorView = view.findViewById(R.id.comments_compose_author)
+                    timeAgoView = view.findViewById(R.id.comments_compose_timeago)
+                    textView = view.findViewById(R.id.comments_compose_text)
+                    postView = view.findViewById(R.id.comments_compose_post)
+                    cancelView = view.findViewById(R.id.comments_compose_cancel)
+                    spacersContainer = view.findViewById(R.id.comments_compose_spacerscontainer)
+                }.also { view.tag = it }
+            }
+
+            holder.bind(
+                indentLevel = row.indentLevel,
+                commentLevelIndentPx = mCommentLevelIndentPx,
+                fontSizeText = mFontSizeText,
+                fontSizeMetadata = mFontSizeMetadata
+            )
+            return view
+        }
+    }
+
+    private sealed class CommentListRow {
+        data class Comment(val comment: HNComment) : CommentListRow()
+        data class Compose(val replyTo: HNComment?, val indentLevel: Int) : CommentListRow()
     }
     
     data class CommentViewHolder(
@@ -517,10 +765,17 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
         var textView: LinkifiedTextView? = null,
         var authorView: TextView? = null,
         var timeAgoView: TextView? = null,
+        var deleteView: TextView? = null,
         var expandView: ImageView? = null,
         var spacersContainer: LinearLayout? = null
     ) {
-        fun setComment(comment: HNComment?, commentLevelIndentPx: Int, c: Context, commentTextSize: Int, metadataTextSize: Int) {
+        fun setComment(
+            comment: HNComment?,
+            commentLevelIndentPx: Int,
+            c: Context,
+            commentTextSize: Int,
+            metadataTextSize: Int
+        ) {
             textView?.textSize = commentTextSize.toFloat()
             textView?.setTextColor(comment?.color ?: Color.BLACK)
             textView?.setLinkTextColor(comment?.color ?: Color.BLACK)
@@ -529,6 +784,7 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
             
             authorView?.textSize = metadataTextSize.toFloat()
             timeAgoView?.textSize = metadataTextSize.toFloat()
+            deleteView?.textSize = metadataTextSize.toFloat()
             
             if (!TextUtils.isEmpty(comment?.author)) {
                 authorView?.text = comment?.author
@@ -538,6 +794,8 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                 // We set this here so that convertView doesn't reuse the old timeAgoView value
                 timeAgoView?.text = ""
             }
+
+            deleteView?.visibility = if (comment?.getDeleteUrl() != null) View.VISIBLE else View.GONE
             
             expandView?.visibility = if (comment?.treeNode?.isExpanded == true) View.INVISIBLE else View.VISIBLE
             
@@ -563,6 +821,61 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
             textView?.setOnLongClickListener(onLongClickListener)
         }
     }
+
+    inner class ComposeViewHolder(
+        var rootView: View? = null,
+        var authorView: TextView? = null,
+        var timeAgoView: TextView? = null,
+        var textView: EditText? = null,
+        var postView: TextView? = null,
+        var cancelView: TextView? = null,
+        var spacersContainer: LinearLayout? = null
+    ) {
+        private var watchingDraft = false
+
+        private val draftWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                mComposeDraft = s?.toString() ?: ""
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        }
+
+        fun bind(indentLevel: Int, commentLevelIndentPx: Int, fontSizeText: Int, fontSizeMetadata: Int) {
+            val userName = Settings.getUserName(this@CommentsActivity)
+            authorView?.textSize = fontSizeMetadata.toFloat()
+            timeAgoView?.textSize = fontSizeMetadata.toFloat()
+            authorView?.text = userName
+            timeAgoView?.text = ", ${getString(R.string.comment_now)}"
+
+            textView?.textSize = fontSizeText.toFloat()
+            if (!watchingDraft) {
+                textView?.addTextChangedListener(draftWatcher)
+                watchingDraft = true
+            }
+            if (textView?.text?.toString() != mComposeDraft) {
+                textView?.setText(mComposeDraft)
+                textView?.setSelection(mComposeDraft.length)
+            }
+            textView?.isEnabled = !mIsPostingComment
+
+            postView?.textSize = fontSizeMetadata.toFloat()
+            postView?.isEnabled = !mIsPostingComment
+            postView?.setOnClickListener { confirmPostComment() }
+            cancelView?.textSize = fontSizeMetadata.toFloat()
+            cancelView?.isEnabled = !mIsPostingComment
+            cancelView?.setOnClickListener { hideCompose() }
+
+            spacersContainer?.removeAllViews()
+            for (i in 0 until indentLevel) {
+                val spacer = View(this@CommentsActivity)
+                spacer.layoutParams = LinearLayout.LayoutParams(commentLevelIndentPx, ViewGroup.LayoutParams.MATCH_PARENT)
+                val spacerAlpha = maxOf(70 - i * 10, 10)
+                spacer.setBackgroundColor(Color.argb(spacerAlpha, 0, 0, 0))
+                spacersContainer?.addView(spacer, i)
+            }
+        }
+    }
     
     private fun setCommentToUpvote(comment: HNComment) {
         mPendingVote = comment
@@ -573,7 +886,13 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
             ACTIVITY_LOGIN -> {
                 when (resultCode) {
                     RESULT_OK -> {
-                        if (mPendingVote != null) {
+                        val pendingComment = mPendingAddComment || mPendingReplyTo != null
+                        if (mPendingVote != null || pendingComment) {
+                            if (pendingComment) {
+                                mIsComposing = true
+                                mComposeParentId = mPendingReplyTo?.commentId
+                                mShowComposeAfterLoad = true
+                            }
                             mComments = HNPostComments()
                             mCommentsListAdapter?.notifyDataSetChanged()
                             startFeedLoading()
@@ -581,7 +900,15 @@ class CommentsActivity : BaseListActivity(), ITaskFinishedHandler<HNPostComments
                         }
                     }
                     RESULT_CANCELED -> {
-                        Toast.makeText(this, getString(R.string.error_login_to_vote), Toast.LENGTH_LONG).show()
+                        val pendingComment = mPendingAddComment || mPendingReplyTo != null
+                        mPendingReplyTo = null
+                        mPendingAddComment = false
+                        val message = if (pendingComment) {
+                            R.string.error_login_to_comment
+                        } else {
+                            R.string.error_login_to_vote
+                        }
+                        Toast.makeText(this, getString(message), Toast.LENGTH_LONG).show()
                     }
                 }
             }

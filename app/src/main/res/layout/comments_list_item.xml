@@ -44,6 +44,23 @@
                 android:textColor="@color/gray_comments_information"
                 android:textSize="14sp" />
 
+            <TextView
+                android:id="@+id/comments_list_item_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/comments_list_item_author"
+                android:layout_toRightOf="@+id/comments_list_item_timeago"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingLeft="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="@string/delete_comment"
+                android:textColor="@color/gray_comments_information"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
             <com.sergebakharev.hnplus.reuse.LinkifiedTextView
                 android:id="@+id/comments_list_item_text"
                 android:layout_width="wrap_content"
