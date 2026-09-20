@@ -20,9 +20,9 @@ class AboutActivity : AppCompatActivity() {
         // Set custom font for the HN title
         binding.aboutHn.typeface = FontHelper.getComfortaa(this, true)
 
-        // Set up the URL link
-        binding.aboutUrl.text = Html.fromHtml("<a href=\"https://serge.industries\">serge.industries</a>")
-        binding.aboutUrl.movementMethod = LinkMovementMethod.getInstance()
+        // Set up the original app credit
+        binding.aboutCredit.text = Html.fromHtml("Original <a href=\"https://github.com/manmal/hn-android\">HN</a> by Manuel Maly")
+        binding.aboutCredit.movementMethod = LinkMovementMethod.getInstance()
 
         // Set up the GitHub link
         binding.aboutGithub.text = Html.fromHtml("<a href=\"https://github.com/SergeBakharev/hnplus/\">Fork this at Github</a>")

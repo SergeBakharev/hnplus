@@ -1,5 +1,8 @@
 # Changelog
 
+[unreleased]
+- Changed: Better attribution to Manuel Maly on the about page
+
 ## 0.1.11
 - Fixed: System back swipe closes screens with the same animation as the action bar back button
 - Added: uBlock Origin Settings on the Settings screen
