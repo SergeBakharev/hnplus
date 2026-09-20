@@ -52,7 +52,8 @@
             android:name=".CommentsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false"
-            android:theme="@style/ActionBar.Orange.Back">
+            android:theme="@style/ActionBar.Orange.Back"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <data android:mimeType="text/plain" />

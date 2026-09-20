@@ -11,9 +11,16 @@ class HNComment(// do not want to parse this :P
     val commentLevel: Int,
     val isDownvoted: Boolean,
     private val mUpvoteUrl: String?,
-    private val mDownvoteUrl: String?
+    private val mDownvoteUrl: String?,
+    private val mDeleteUrl: String? = null
 ) : Serializable {
     var treeNode: HNCommentTreeNode? = null
+
+    val commentId: String?
+        get() {
+            val match = ITEM_ID_PATTERN.find(commentLink) ?: return null
+            return match.groupValues[1]
+        }
 
     fun getUpvoteUrl(currentUserName: String?): String? {
         if (mUpvoteUrl == null || !mUpvoteUrl.contains("auth="))  // HN changed authentication
@@ -27,7 +34,10 @@ class HNComment(// do not want to parse this :P
         return mDownvoteUrl
     }
 
+    fun getDeleteUrl(): String? = mDeleteUrl
+
     companion object {
         private const val serialVersionUID = 1286983917054008714L
+        private val ITEM_ID_PATTERN = Regex("""(?:[?&]id=)(\d+)""")
     }
 }

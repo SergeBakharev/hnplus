@@ -38,7 +38,7 @@
     <string name="collapse_comment">Collapse Comment</string>
     <string name="collapse_thread">Collapse Thread</string>
     <string name="no_comments">No Comments</string>
-    <string name="login_success_reloading">Login successful: reloading the comments to get proper upvote links.</string>
+    <string name="login_success_reloading">Login successful: reloading comments.</string>
     <string name="click_on_comments">Click on comments to read the related article</string>
     <string name="click_on_article">Click on article to read the related comments</string>
     <!-- Error messages -->
@@ -46,6 +46,21 @@
     <string name="error_unknown_error">An unknown error occurred.</string>
     <string name="error_login_failed">Could not login - please check username and password.</string>
     <string name="error_login_to_vote">Sorry, you must login in order to vote.</string>
+    <string name="error_login_to_comment">Sorry, you must login in order to comment.</string>
+    <string name="add_comment">Add Comment</string>
+    <string name="reply">Reply</string>
+    <string name="reply_to">Reply to %1$s</string>
+    <string name="post_comment">Post Comment</string>
+    <string name="confirm_post_comment">Post this comment?</string>
+    <string name="comment_now">now</string>
+    <string name="comment_hint">Write a comment&#8230;</string>
+    <string name="comment_empty">Comment cannot be empty.</string>
+    <string name="comment_success">Comment posted</string>
+    <string name="comment_error">Could not post comment. Please try again.</string>
+    <string name="delete_comment">Delete</string>
+    <string name="confirm_delete_comment">Delete this comment?</string>
+    <string name="delete_success">Comment deleted</string>
+    <string name="delete_error">Could not delete comment. It may be too old or already have replies.</string>
     <string name="error_unable_to_retrieve_comments">We were unable to retrieve the latest comments for this post.</string>
     <string name="error_unable_to_retrieve_feed">We were unable to update the posts feed</string>
     <string name="error_unable_to_load_more">We were unable to load more articles</string>

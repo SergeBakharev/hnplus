@@ -1,6 +1,9 @@
 # Changelog
 
-[unreleased]
+## 0.1.12
+- Added: Post comments and replies from the comments screen
+- Added: Delete your own comments when Hacker News still allows it
+- Fixed: Own comments no longer show "delete" as part of the timestamp
 - Changed: Better attribution to Manuel Maly on the about page
 
 ## 0.1.11
