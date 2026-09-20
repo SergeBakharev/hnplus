@@ -1,8 +1,7 @@
 # Changelog
 
-## Unreleased
+## 0.1.12
 - Added: Post comments and replies from the comments screen
-- Changed: Replies are written inline under the parent comment, then confirmed in a dialog
 - Added: Delete your own comments when Hacker News still allows it
 - Fixed: Own comments no longer show "delete" as part of the timestamp
 - Changed: Better attribution to Manuel Maly on the about page
