@@ -5,6 +5,7 @@
 - Changed: Replies are written inline under the parent comment, then confirmed in a dialog
 - Added: Delete your own comments when Hacker News still allows it
 - Fixed: Own comments no longer show "delete" as part of the timestamp
+- Changed: Better attribution to Manuel Maly on the about page
 
 ## 0.1.11
 - Fixed: System back swipe closes screens with the same animation as the action bar back button
