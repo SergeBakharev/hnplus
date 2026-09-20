@@ -39,8 +39,8 @@ android {
         applicationId "com.sergebakharev.hnplus"
         minSdk 26
         targetSdk 36
-        versionCode 10
-        versionName project.hasProperty("versionName") ? project.property("versionName") : "0.0.0"
+        versionCode 12
+        versionName 0.1.12
     }
     signingConfigs {
         def props = new Properties()
