@@ -6,11 +6,9 @@ buildscript {
 
 plugins {
     id 'com.android.application'
-    id 'kotlin-android'
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.4.10"
     implementation "androidx.core:core:1.19.0"
     implementation "androidx.legacy:legacy-support-core-utils:1.0.0"
     implementation "androidx.appcompat:appcompat:1.7.1"
@@ -28,9 +26,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     compileSdk 37
     buildFeatures {
         viewBinding true
@@ -40,7 +35,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode 12
-        versionName 0.1.12
+        versionName "0.1.12"
     }
     signingConfigs {
         def props = new Properties()
@@ -63,19 +58,6 @@ android {
         }
         debug {
         }
-    }
-    
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def outputFile = output.outputFileName
-            if (outputFile != null && outputFile.endsWith('.aab')) {
-                def fileName = "hnplus-${variant.buildType.name}-${versionName}.aab"
-                output.outputFileName = fileName
-            }
-        }
-    }
-    sourceSets {
-        main.java.srcDirs = ['src/main/kotlin']
     }
 }
 
